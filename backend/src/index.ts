@@ -1,0 +1,68 @@
+import express from "express";
+import morgan from "morgan";
+import cors from "cors";
+import swaggerUI from "swagger-ui-express";
+import swaggerJSDoc from "swagger-jsdoc";
+import { sequelize, syncDatabase } from "./models/database";
+import { start } from "repl";
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(morgan('dev')); // logging middleware
+app.use(cors()); // CORS middleware
+app.use(express.json()); // JSON parsing middleware
+
+// error handler
+app.use( (err: any, req: any, res: any, next: any) => {
+  console.log(err.stack);
+  res.status(err.status || 500).json({
+    code: err.status || 500,
+    description: err.message || "An error occurred"
+  });
+});
+
+// generate OpenAPI spec and show swagger ui
+const swaggerSpec = swaggerJSDoc({
+  definition: {
+    openapi: '3.1.0',
+    info: {
+      title: 'To-do List REST API',
+      version: '1.0.0',
+    },
+  },
+  apis: ['./routes/*Router.js'], // files containing annotations
+});
+
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
+
+// routes
+// health check route
+app.get('/api/health', (req, res) => {
+  res.json({
+    success: true,
+    message: 'MEMEMUSEUM API is running!',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV
+  });
+});
+
+
+const startServer = async () => {
+  try {
+    console.log('Connecting to database...');
+    await syncDatabase(false);
+    console.log('Database connected and synchronized');
+    
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+      console.log(`Health check: http://localhost:${PORT}/api/health`);
+      console.log(`API docs: http://localhost:${PORT}/api-docs`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
