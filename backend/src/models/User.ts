@@ -7,7 +7,7 @@ export interface UserAttributes {
   id: number;
   username: string;
   password: string;
-  email: String;
+  email: string;
   createdAt?: Date;
 }
 
