@@ -3,8 +3,10 @@ import morgan from "morgan";
 import cors from "cors";
 import swaggerUI from "swagger-ui-express";
 import swaggerJSDoc from "swagger-jsdoc";
-import { sequelize, syncDatabase } from "./models/database";
-import { start } from "repl";
+import { syncDatabase } from "./models/database";
+
+// routes imports
+import { authRouter } from "./routes/authRouter";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,16 +24,16 @@ app.use( (err: any, req: any, res: any, next: any) => {
   });
 });
 
-// generate OpenAPI spec and show swagger ui
+// OpenAPI specs
 const swaggerSpec = swaggerJSDoc({
   definition: {
     openapi: '3.1.0',
     info: {
-      title: 'To-do List REST API',
+      title: 'MemeMuseum REST API',
       version: '1.0.0',
     },
   },
-  apis: ['./routes/*Router.js'], // files containing annotations
+  apis: ['./src/routes/*.ts'],
 });
 
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
@@ -47,6 +49,8 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// auth route
+app.use(authRouter);
 
 const startServer = async () => {
   try {
