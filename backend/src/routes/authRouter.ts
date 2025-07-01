@@ -31,7 +31,7 @@ export const authRouter = express.Router();
  *          description: Invalid credentials
  */
 authRouter.post("/login", async (req: Request, res: Response) => {
-  const isAuthenticated = await AuthController.checkCredentials(req, res);
+  const isAuthenticated = await AuthController.checkCredentials(req);
   if (isAuthenticated) {
     res.json(AuthController.issueToken(req.body.usr));
   } else {
@@ -71,7 +71,7 @@ authRouter.post("/login", async (req: Request, res: Response) => {
  */
 authRouter.post("/signup", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = await AuthController.saveUser(req, res);
+    const user = await AuthController.saveUser(req);
     res.status(201).json(user);
   } catch (err) {
     console.log(err);
