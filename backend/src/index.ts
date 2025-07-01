@@ -3,26 +3,22 @@ import morgan from "morgan";
 import cors from "cors";
 import swaggerUI from "swagger-ui-express";
 import swaggerJSDoc from "swagger-jsdoc";
+
+// database import
 import { syncDatabase } from "./models/database";
+
+// middleware imports
+import errorHandler from "./middlewares/errorHandler";
 
 // routes imports
 import { authRouter } from "./routes/authRouter";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT ?? 3000;
 
 app.use(morgan('dev')); // logging middleware
 app.use(cors()); // CORS middleware
 app.use(express.json()); // JSON parsing middleware
-
-// error handler
-app.use( (err: any, req: any, res: any, next: any) => {
-  console.log(err.stack);
-  res.status(err.status || 500).json({
-    code: err.status || 500,
-    description: err.message || "An error occurred"
-  });
-});
 
 // OpenAPI specs
 const swaggerSpec = swaggerJSDoc({
@@ -51,6 +47,9 @@ app.get('/api/health', (req, res) => {
 
 // auth route
 app.use(authRouter);
+
+// error handler
+app.use(errorHandler);
 
 const startServer = async () => {
   try {

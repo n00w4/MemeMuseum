@@ -1,4 +1,4 @@
-import { Sequelize, DataTypes, Model, Optional } from "sequelize";
+import { Sequelize, DataTypes, Model } from "sequelize";
 
 export interface MemeTagAttributes {
     meme_id: number;

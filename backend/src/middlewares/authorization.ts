@@ -1,10 +1,12 @@
 import { Jwt, JwtPayload } from "jsonwebtoken";
 import { AuthController } from "../controllers/authController";
-import { Request, Response, NextFunction } from 'express';
+import { Request, NextFunction } from 'express';
 
 /**
  * Middleware to verify user authentication. If the user is not logged in,
  * they are redirected to the login page with an appropriate error message.
+ * @param req - The request object.
+ * @param next - The next middleware function.
  */
 
 interface AuthenticatedRequest extends Request {

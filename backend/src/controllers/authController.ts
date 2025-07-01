@@ -32,8 +32,8 @@ export class AuthController {
 
   static issueToken(username: string): string {
     return Jwt.sign(
-      { user: username }, 
-      process.env.TOKEN_SECRET as string, 
+      { user: username, iss: "MemeMuseum" }, 
+      process.env.JWT_SECRET as string, 
       { expiresIn: `${24 * 60 * 60}s` }
     );
   }
