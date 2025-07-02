@@ -11,7 +11,7 @@ export class AuthController {
   static async checkCredentials(req: Request): Promise<boolean> {
     const found = await User.findOne({
       where: {
-        username: req.body.usr,
+        email: req.body.email,
         password: req.body.pwd
       }
     });

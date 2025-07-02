@@ -1,6 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
 import { AuthController } from "../controllers/authController";
-
 export const authRouter = express.Router();
 
 /**
@@ -30,12 +29,13 @@ export const authRouter = express.Router();
  *        401:
  *          description: Invalid credentials
  */
-authRouter.post("/login", async (req: Request, res: Response) => {
+authRouter.post("/login", async (req, res) => {
   const isAuthenticated = await AuthController.checkCredentials(req);
   if (isAuthenticated) {
-    res.json(AuthController.issueToken(req.body.usr));
+    const token = AuthController.issueToken(req.body.usr);
+    res.success("Login successful", { token });
   } else {
-    res.status(401).json({ error: "Invalid credentials. Try again." });
+    res.fail(401, "Invalid credentials. Try again.");
   }
 });
 
@@ -66,15 +66,15 @@ authRouter.post("/login", async (req: Request, res: Response) => {
  *      responses:
  *        201:
  *          description: User created
- *        401:
- *          description: Invalid credentials
+ *        500:
+ *          description: Could not save user
  */
 authRouter.post("/signup", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = await AuthController.saveUser(req);
-    res.status(201).json(user);
+    res.success("User created", user, 201);
   } catch (err) {
-    console.log(err);
-    next({ status: 500, message: "Could not save user" });
+    console.error(err);
+    res.fail(500, "Could not save user");
   }
 });

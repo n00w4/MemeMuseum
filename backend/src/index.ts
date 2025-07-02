@@ -9,6 +9,7 @@ import { syncDatabase } from "./models/database";
 
 // middleware imports
 import errorHandler from "./middlewares/errorHandler";
+import responseWrapper from "./middlewares/responseWrapper";
 
 // routes imports
 import { authRouter } from "./routes/authRouter";
@@ -19,6 +20,7 @@ const PORT = process.env.PORT ?? 3000;
 app.use(morgan('dev')); // logging middleware
 app.use(cors()); // CORS middleware
 app.use(express.json()); // JSON parsing middleware
+app.use(responseWrapper); // Response wrapper middleware
 
 // OpenAPI specs
 const swaggerSpec = swaggerJSDoc({
@@ -48,7 +50,7 @@ app.get('/api/health', (req, res) => {
 // auth route
 app.use(authRouter);
 
-// error handler
+// error handler middleware
 app.use(errorHandler);
 
 const startServer = async () => {

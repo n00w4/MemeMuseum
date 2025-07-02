@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { ApiError } from '../common/ApiError';
 
 /**
  * Error handler middleware
@@ -9,9 +10,17 @@ import { Request, Response, NextFunction } from 'express';
  */
 
 function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
-    res.status(err.status ?? 500).json({
-        code: err.status ?? 500,
-        description: err.message ?? "An error occurred"
+    if (err instanceof ApiError) {
+        res.status(err.status).json({
+            code: err.status,
+            description: err.message,
+        });
+    }
+
+    console.error('Unhandled error:', err);
+    res.status(500).json({
+        code: 500,
+        description: 'Internal Server Error'
     });
 }
 
