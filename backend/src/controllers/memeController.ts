@@ -1,4 +1,6 @@
 import { Meme } from '../models/Meme';
+import { FeaturedMeme } from '../models/FeaturedMeme';
+import { Sequelize } from 'sequelize';
 
 export class MemeController {
     /**
@@ -19,4 +21,31 @@ export class MemeController {
         const memes = await Meme.findAll({ limit: limit });
         return memes;
     }
+
+    /**
+     * Retrieves a random meme from the database
+     * @returns {Promise<Meme>} meme - A random meme
+     */
+    static async getMemeOfTheDay(): Promise<Meme | null> {
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+    let featured = await FeaturedMeme.findOne({ where: { date: today } });
+
+    if (featured) {
+      return await Meme.findOne({ where: { id: featured.memeId } });
+    }
+
+    let meme = await Meme.findOne({
+      order: [Sequelize.literal('RANDOM()')]
+    });
+
+    if (meme) {
+      await FeaturedMeme.create({
+        memeId: meme.id,
+        date: today
+      });
+    }
+
+    return meme;
+  }
 }
