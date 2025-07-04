@@ -29,7 +29,7 @@ export const authRouter = express.Router();
  *        401:
  *          description: Invalid credentials
  */
-authRouter.post("/login", async (req, res) => {
+authRouter.post("/login", async (req: Request, res: Response, next: NextFunction) => {
   const isAuthenticated = await AuthController.checkCredentials(req);
   if (isAuthenticated) {
     const token = AuthController.issueToken(req.body.usr);

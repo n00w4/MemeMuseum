@@ -13,6 +13,7 @@ import responseWrapper from "./middlewares/responseWrapper";
 
 // routes imports
 import { authRouter } from "./routes/authRouter";
+import { memeRouter } from "./routes/memeRouter";
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
@@ -38,7 +39,7 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 
 // routes
 // health check route
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (req: express.Request, res: express.Response) => {
   res.json({
     success: true,
     message: 'MEMEMUSEUM API is running!',
@@ -49,9 +50,15 @@ app.get('/api/health', (req, res) => {
 
 // auth route
 app.use(authRouter);
+app.use(memeRouter);
 
 // error handler middleware
 app.use(errorHandler);
+
+// 404 handler
+app.use((req: express.Request, res: express.Response) => {
+  res.status(404).json({ message: 'Route not found' });
+});
 
 const startServer = async () => {
   try {
