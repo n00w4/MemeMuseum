@@ -6,7 +6,7 @@ export class AuthController {
   /**
    * Handles post requests on /auth. Checks that the given credentials are valid
    * @param {Request} req - The request object
-   * @returns {Promise<boolean>} found - A boolean indicating whether the credentials are valid
+   * @returns {Promise<boolean>} - A boolean indicating whether the credentials are valid
    */
   static async checkCredentials(req: Request): Promise<boolean> {
     const found = await User.findOne({

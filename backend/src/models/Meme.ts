@@ -9,6 +9,7 @@ export interface MemeAttributes {
   title: string;
   image: string;
   datetime_upload: Date;
+  user_id: number;
 }
 
 export interface MemeCreationAttributes extends Optional<MemeAttributes, 'id'> {}
@@ -18,14 +19,15 @@ export class Meme extends Model<MemeAttributes, MemeCreationAttributes> implemen
   public title!: string;
   public image!: string;
   public datetime_upload!: Date;
+  public user_id!: number;
 
-  // Associazione
+  // Associations
   public readonly user?: User;
   public readonly tags?: Tag[];
   public readonly votes?: Vote[];
   public readonly comments?: Comment[];
 
-  // timestamps
+  // Timestamps
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -38,16 +40,25 @@ export function initMemeModel(sequelize: Sequelize): void {
       primaryKey: true
     },
     title: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.TEXT,
       allowNull: false
     },
     image: {
-      type: DataTypes.STRING(500),
+      type: DataTypes.TEXT,
       allowNull: false
     },
     datetime_upload: {
       type: DataTypes.DATE,
       allowNull: false
+    },
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id'
+      },
+      onDelete: 'CASCADE'
     }
   }, {
     sequelize,
@@ -56,3 +67,4 @@ export function initMemeModel(sequelize: Sequelize): void {
     timestamps: true
   });
 }
+

@@ -59,13 +59,16 @@ memeRouter.get("/meme-of-the-day", async (req: Request, res: Response, next: Nex
  *      responses:
  *        200:
  *          description: Meme retrieved successfully
+ *        404:
+ *          description: Meme not found
  *        500:
  *          description: Internal server error
  */
 memeRouter.get("/memes/:id", async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const memes = await MemeController.getMemes(parseInt(req.params.id));
-        res.success('Memes retrieved successfully', memes);
+        const meme = await MemeController.getMemes(parseInt(req.params.id));
+        meme ?? res.fail(404, 'Meme not found');
+        res.success('Memes retrieved successfully', meme);
     } catch (err) {
         console.error(err);
         res.fail(500, 'Could not retrieve memes');

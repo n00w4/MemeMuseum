@@ -1,11 +1,15 @@
 import { Sequelize, DataTypes, Model } from "sequelize";
+import { Meme } from "./Meme";
+import { Tag } from "./Tag";
 
 export interface MemeTagAttributes {
-    meme_id: number;
-    tag_id: number;
+
 }
 
-export class MemeTag extends Model<MemeTagAttributes> {}
+export class MemeTag extends Model<MemeTagAttributes> {
+  public readonly meme?: Meme;
+  public readonly tag?: Tag;
+}
 
 export function initMemeTagModel(sequelize: Sequelize) {
   MemeTag.init({

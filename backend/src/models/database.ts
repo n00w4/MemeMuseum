@@ -2,7 +2,6 @@ import { Dialect, Sequelize } from 'sequelize';
 import 'dotenv/config';
 import { initUserModel, User } from "./User";
 import { initMemeModel, Meme } from "./Meme";
-import { initMemeTagModel, MemeTag } from "./MemeTag";
 import { initTagModel, Tag } from "./Tag";
 import { initVoteModel, Vote } from "./Vote";
 import { initCommentModel, Comment } from "./Comment";
@@ -20,7 +19,6 @@ export const sequelize = new Sequelize(dbConnectionUri, {
 
 initUserModel(sequelize);
 initMemeModel(sequelize);
-initMemeTagModel(sequelize);
 initTagModel(sequelize);
 initVoteModel(sequelize);
 initCommentModel(sequelize);
@@ -38,19 +36,8 @@ Comment.belongsTo(Meme, { foreignKey: "meme_id", as: "meme" });
 User.hasMany(Comment, { foreignKey: "user_id", as: "comments" });
 Comment.belongsTo(User, { foreignKey: "user_id", as: "user" });
 
-Meme.belongsToMany(Tag, {
-  through: MemeTag,
-  foreignKey: "meme_id",
-  otherKey: "tag_id",
-  as: "tags",
-});
-
-Tag.belongsToMany(Meme, {
-  through: MemeTag,
-  foreignKey: "tag_id",
-  otherKey: "meme_id",
-  as: "memes",
-});
+Meme.belongsToMany(Tag, { through: 'meme_tags', foreignKey: 'meme_id' });
+Tag.belongsToMany(Meme, { through: 'meme_tags', foreignKey: 'tag_id' });
 
 export const syncDatabase = async (force: boolean = false): Promise<void> => {
   try {
@@ -65,6 +52,6 @@ export const syncDatabase = async (force: boolean = false): Promise<void> => {
   }
 };
 
-export { User, Meme, Tag, Vote, Comment, MemeTag };
+export { User, Meme, Tag, Vote, Comment};
 
 export default sequelize;

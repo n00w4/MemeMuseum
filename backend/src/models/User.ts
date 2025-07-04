@@ -19,12 +19,14 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public email!: string;
   public password!: string;
 
-  public readonly createdAt!: Date;
-
+  // Associations
   public readonly memes?: Meme[];
   public readonly votes?: Vote[];
   public readonly comments?: Comment[];
-
+  
+  // Timestamps
+  public readonly createdAt!: Date;
+  public readonly updatedAt?: Date;
 }
 export function initUserModel(sequelize: Sequelize): void {
   User.init({
