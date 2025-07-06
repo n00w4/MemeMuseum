@@ -1,6 +1,5 @@
-import { Jwt, JwtPayload } from "jsonwebtoken";
 import { AuthController } from "../controllers/authController";
-import { Request, NextFunction } from 'express';
+import { RequestHandler } from 'express';
 
 /**
  * Middleware to verify user authentication. If the user is not logged in,
@@ -9,38 +8,26 @@ import { Request, NextFunction } from 'express';
  * @param next - The next middleware function.
  */
 
-interface AuthenticatedRequest extends Request {
-  username?: string;
-}
-
-export function enforceAuthentication(
-  req: AuthenticatedRequest,
-  next: NextFunction
-): void {
+export const enforceAuthentication: RequestHandler = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader?.split(' ')[1];
 
   if (!token) {
-    next({ status: 401, message: 'Unauthorized' });
-    return;
+    return next({ status: 401, message: 'Unauthorized' });
   }
 
-  AuthController.isTokenValid(
-  token,
-  (err: Error | null, decodedToken?: string | Jwt | JwtPayload) => {
+  AuthController.isTokenValid(token, (err, decodedToken) => {
     if (
       err ||
       !decodedToken ||
       typeof decodedToken !== 'object' ||
       !('user' in decodedToken)
     ) {
-      next({ status: 401, message: 'Unauthorized' });
-    } else {
-      const { user } = decodedToken as { user: string };
-      req.username = user;
-      next();
+      return next({ status: 401, message: 'Unauthorized' });
     }
-  }
-);
-}
+
+    (req as any).username = (decodedToken as { user: string }).user;
+    next();
+  });
+};
 

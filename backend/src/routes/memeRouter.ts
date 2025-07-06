@@ -3,6 +3,8 @@ import { MemeController } from "../controllers/memeController";
 import { VoteController } from "../controllers/voteController";
 import { CommentController } from "../controllers/commentController";
 import { upload } from "../middlewares/upload";
+import { MulterError } from "multer";
+import { enforceAuthentication } from "../middlewares/authorization";
 
 export const memeRouter = express.Router();
 
@@ -14,7 +16,7 @@ export const memeRouter = express.Router();
  *      produces:
  *        - application/json
  *      responses:
- *        200:
+ *        200: 
  *          description: Memes retrieved successfully
  *        500:
  *          description: Internal server error
@@ -31,68 +33,93 @@ memeRouter.get("/memes", async (req: Request, res: Response, next: NextFunction)
 
 /**
  * @swagger
- *  /memes:
- *    post:
- *      description: Create a new meme
- *      produces:
- *        - application/json
- *      requestBody:
- *        description: Meme data
- *        required: true
- *        content:
- *          multipart/form-data:
- *            schema:
- *              type: object
- *              properties:
- *                title:
- *                  type: string
- *                  example: Meme title
- *                image:
- *                  type: string
- *                  format: binary
- *                  example: Meme image
- *                user_id:
- *                  type: number
- *                  example: 1
- *      responses:
- *        201:
- *          description: Meme created successfully
- *        400:
- *          description: Bad request
- *        500:
- *          description: Internal server error
+ * /memes:
+ *   post:
+ *     description: Create a new meme
+ *     produces:
+ *       - application/json
+ *     requestBody:
+ *       description: Meme data
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: Meme title
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 example: Meme image
+ *               user_id:
+ *                 type: number
+ *                 example: 1
+ *     responses:
+ *       201:
+ *         description: Meme created successfully
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
  */
-memeRouter.post('/memes', upload.single('image'), async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { title, user_id } = req.body;
+memeRouter.post('/memes', enforceAuthentication, (req: Request, res: Response, next: NextFunction) => {
+  upload.single('image')(req, res, async (err) => {
+    try {
+      if (err instanceof MulterError) {
+        switch (err.code) {
+          case 'LIMIT_FILE_SIZE':
+            return res.fail(400, 'File too large. Maximum size is 10MB');
+          case 'LIMIT_FILE_COUNT':
+            return res.fail(400, 'Too many files. Only 1 file is allowed');
+          case 'LIMIT_UNEXPECTED_FILE':
+            return res.fail(400, 'Unexpected file field');
+          case 'LIMIT_FIELD_COUNT':
+            return res.fail(400, 'Too many fields');
+          case 'LIMIT_FIELD_KEY':
+            return res.fail(400, 'Field name too long');
+          case 'LIMIT_FIELD_VALUE':
+            return res.fail(400, 'Field value too long');
+          case 'LIMIT_PART_COUNT':
+            return res.fail(400, 'Too many parts');
+          default:
+            return res.fail(400, `Upload error: ${err.message}`);
+        }
+      }
 
-    if (!title) {
-      return res.fail(400, 'Title is required');
+      const { title, user_id } = req.body;
+      
+      if (!title) {
+        return res.fail(400, 'Title is required');
+      }
+      
+      if (!user_id) {
+        return res.fail(400, 'User ID is required');
+      }
+      
+      if (!req.file) {
+        return res.fail(400, 'Image is required. Only JPEG, PNG, GIF, and WebP images are accepted');
+      }
+      
+      const parsedUserId = parseInt(user_id, 10);
+      if (isNaN(parsedUserId)) {
+        return res.fail(400, 'User ID must be a number');
+      }
+
+      const meme = await MemeController.saveMeme({
+        title,
+        imageBuffer: req.file.buffer,
+        user_id: parsedUserId
+      });
+
+      return res.success('Meme created successfully', meme, 201);
+
+    } catch (error) {
+      console.error('Meme creation error:', error);
+      return res.fail(500, 'Could not create meme');
     }
-    if (!user_id) {
-      return res.fail(400, 'User ID is required');
-    }
-    if (!req.file) {
-      return res.fail(400, 'Image is required');
-    }
-
-    const parsedUserId = parseInt(user_id, 10);
-    if (isNaN(parsedUserId)) {
-      return res.fail(400, 'User ID must be a number');
-    }
-
-    const meme = await MemeController.saveMeme({
-      title,
-      imageBuffer: req.file.buffer,
-      user_id: parsedUserId
-    });
-
-    return res.success('Meme created successfully', meme, 201);
-
-  } catch (err) {
-    console.error(err);
-    return res.fail(500, 'Could not create meme');
-  }
+  });
 });
 
 /**
@@ -173,7 +200,7 @@ memeRouter.get("/memes/:id", async (req: Request, res: Response, next: NextFunct
  *        500:
  *          description: Internal server error
  */
-memeRouter.post("/memes/:id/vote", async (req: Request, res: Response, next: NextFunction) => {
+memeRouter.post("/memes/:id/vote", enforceAuthentication,async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (req.body.value !== 1 && req.body.value !== -1) {
         return res.fail(400, 'Value must be 1 or -1');
@@ -218,7 +245,7 @@ memeRouter.post("/memes/:id/vote", async (req: Request, res: Response, next: Nex
  *        500:
  *          description: Internal server error
  */
-memeRouter.post("/memes/:id/comment", async (req: Request, res: Response, next: NextFunction) => {
+memeRouter.post("/memes/:id/comment", enforceAuthentication, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const comment = await CommentController.saveComment(req);
         res.success('Comment created successfully', comment);
