@@ -1,10 +1,11 @@
 import express, { Request, Response, NextFunction } from "express";
 import { AuthController } from "../controllers/authController";
+
 export const authRouter = express.Router();
 
 /**
  * @swagger
- *  /login:
+ *  /api/v1/login:
  *    post:
  *      description: User login and authentication
  *      produces:
@@ -41,7 +42,7 @@ authRouter.post("/login", async (req: Request, res: Response, next: NextFunction
 
 /**
  * @swagger
- *  /signup:
+ *  /api/v1/signup:
  *    post:
  *      description: User registration
  *      produces:

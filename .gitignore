@@ -43,13 +43,13 @@ testem.log
 .history/*
 
 # Angular
-frontend/.angular/cache/
-frontend/.angular/config.json
-frontend/.browserlistrc
-frontend/.firebase/
-frontend/.sass-cache/
-frontend/.cache/
-/.angular/cache
+frontend/*/.angular/cache/
+frontend/*/.angular/config.json
+frontend/*/.browserlistrc
+frontend/*/.firebase/
+frontend/*/.sass-cache/
+frontend/*/.cache/
+frontend/*/.angular
 
 # Output Angular
 frontend/tmp/

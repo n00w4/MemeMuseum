@@ -10,7 +10,7 @@ export const memeRouter = express.Router();
 
 /**
  * @swagger
- *  /memes:
+ *  /api/v1/memes:
  *    get:
  *      description: Retrieve all memes
  *      produces:
@@ -33,7 +33,7 @@ memeRouter.get("/memes", async (req: Request, res: Response, next: NextFunction)
 
 /**
  * @swagger
- * /memes:
+ * /api/v1/memes:
  *   post:
  *     description: Create a new meme
  *     produces:
@@ -124,7 +124,7 @@ memeRouter.post('/memes', enforceAuthentication, (req: Request, res: Response, n
 
 /**
  * @swagger
- *  /meme-of-the-day:
+ *  /api/v1/meme-of-the-day:
  *    get:
  *      description: Retrieve the meme of the day
  *      produces:
@@ -147,7 +147,7 @@ memeRouter.get("/meme-of-the-day", async (req: Request, res: Response, next: Nex
 
 /**
  * @swagger
- *  /memes/{id}:
+ *  /api/v1/memes/{id}:
  *    get:
  *      description: Retrieve the meme with the specified ID
  *      produces:
@@ -173,7 +173,7 @@ memeRouter.get("/memes/:id", async (req: Request, res: Response, next: NextFunct
 
 /**
  * @swagger
- *  /memes/{id}/vote:
+ *  /api/v1/memes/{id}/vote:
  *    post:
  *      description: Vote on a meme
  *      produces:
@@ -215,7 +215,7 @@ memeRouter.post("/memes/:id/vote", enforceAuthentication,async (req: Request, re
 
 /**
  * @swagger
- *  /memes/{id}/comment:
+ *  /api/v1/memes/{id}/comment:
  *    post:
  *      description: Create a comment on a meme
  *      produces:

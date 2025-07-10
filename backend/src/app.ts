@@ -12,8 +12,7 @@ import errorHandler from "./middlewares/errorHandler";
 import responseWrapper from "./middlewares/responseWrapper";
 
 // routes imports
-import { authRouter } from "./routes/authRouter";
-import { memeRouter } from "./routes/memeRouter";
+import apiRouter from "./routes/apiRouter";
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
@@ -35,22 +34,10 @@ const swaggerSpec = swaggerJSDoc({
   apis: ['./src/routes/*.ts'],
 });
 
-app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
+app.use('/api/v1/docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 
 // routes
-// health check route
-app.get('/api/health', (req: express.Request, res: express.Response) => {
-  res.json({
-    success: true,
-    message: 'MEMEMUSEUM API is running!',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
-  });
-});
-
-// auth route
-app.use(authRouter);
-app.use(memeRouter);
+app.use(apiRouter);
 
 // error handler middleware
 app.use(errorHandler);
@@ -68,8 +55,8 @@ const startServer = async () => {
     
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
-      console.log(`Health check: http://localhost:${PORT}/api/health`);
-      console.log(`API docs: http://localhost:${PORT}/api-docs`);
+      console.log(`Health check: http://localhost:${PORT}/api/v1/health`);
+      console.log(`API docs: http://localhost:${PORT}/api/v1/docs`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

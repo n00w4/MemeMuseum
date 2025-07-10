@@ -1,0 +1,34 @@
+<div class="login-container">
+  <div class="login-card">
+    <h2>MEMEMUSEUM</h2>
+    <h3>Sign in</h3>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div>
+        <label>Username
+          <input type="text" formControlName="username" />
+        </label>
+      </div>
+
+      <div>
+        <label>Password
+          <input type="password" formControlName="password" />
+        </label>
+      </div>
+
+      <button type="submit" [disabled]="loading || loginForm.invalid">
+        {{ loading ? "Loading..." : "Login" }}
+      </button>
+
+      @if (errorMessage) {
+        <div class="error">
+          {{ errorMessage }}
+        </div>
+      }
+      @if (successMessage) {
+        <div class="success">
+          {{ successMessage }}
+        </div>
+      }
+    </form>
+  </div>
+</div>
