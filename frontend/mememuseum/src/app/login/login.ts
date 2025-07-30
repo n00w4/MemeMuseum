@@ -34,11 +34,13 @@ export class LoginComponent {
         next: (response) => {
           this.successMessage = 'Logged in successfully!';
           console.log('Login response:', response);
+          this.loading = false;
           // Esempio: localStorage.setItem('token', response.token);
         },
         error: (err) => {
           this.errorMessage = 'Check your credentials or try again later.';
           console.error(err);
+          this.loading = false;
         },
         complete: () => {
           this.loading = false;
