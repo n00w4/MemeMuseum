@@ -1,0 +1,145 @@
+<header class="app-header">
+  <div class="logo-container">
+    <h1 class="logo">MEMEMUSEUM</h1>
+    <p class="tagline">Explore, Share, Laugh</p>
+  </div>
+
+  @if (!isLoggedIn()) {
+    <div class="auth-actions">
+      <a routerLink="/login" class="auth-btn">Login</a>
+      <a routerLink="/register" class="auth-btn accent">Register</a>
+    </div>
+  }
+  @else {
+    <div class="user-actions">
+      <a routerLink="/upload" class="upload-btn">
+        <i class="icon-upload">📤</i> Upload Meme
+      </a>
+      <a routerLink="/profile" class="user-avatar">
+        <i class="icon-user">👤</i>
+      </a>
+    </div>
+  }
+</header>
+
+<main class="content-container">
+  <section class="filters-section">
+    <form [formGroup]="filterForm" (ngSubmit)="applyFilters()">
+      <div class="filter-group">
+        <label for="tags">Filter by Tags:</label>
+        <input 
+          type="text" 
+          id="tags" 
+          formControlName="tags"
+          placeholder="e.g. Programming, Cats, Algorithms"
+          list="tag-suggestions"
+        >
+        <datalist id="tag-suggestions">
+          @for (tag of tags(); track tag) {
+            <option [value]="tag">{{ tag }}</option>
+          }
+        </datalist>
+      </div>
+
+      <div class="filter-group">
+        <label>Date Range:</label>
+        <div formGroupName="dateRange" class="date-range">
+          <input type="date" formControlName="start" placeholder="Start date">
+          <span>to</span>
+          <input type="date" formControlName="end" placeholder="End date">
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Sort By:</label>
+        <select formControlName="sortBy">
+          <option value="ratingDesc">Highest Rated</option>
+          <option value="ratingAsc">Lowest Rated</option>
+          <option value="dateDesc">Newest First</option>
+          <option value="dateAsc">Oldest First</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button type="submit" class="apply-btn">Apply Filters</button>
+        <button type="button" class="reset-btn" (click)="resetFilters()">Reset</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="memes-section">
+    @if (isLoading()) {
+      <div class="loading-indicator">
+        <div class="spinner"></div>
+        <p>Loading memes...</p>
+      </div>
+    }
+    @else {
+      @if (memes().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">🖼️</div>
+          <h3>No memes found</h3>
+          <p>Try adjusting your filters or upload a new meme!</p>
+        </div>
+      }
+      @else {
+        <div class="meme-grid">
+          @for (meme of memes(); track meme.id) {
+            <app-meme-card 
+              [meme]="meme"
+              [isLoggedIn]="isLoggedIn()"
+            ></app-meme-card>
+          }
+        </div>
+
+        @if (totalPages() > 1) {
+          <div class="pagination">
+            <button 
+              class="pagination-btn" 
+              [disabled]="currentPage() === 1"
+              (click)="goToPage(currentPage() - 1)"
+            >
+              &laquo; Prev
+            </button>
+
+            @for (page of pageNumbers(); track page) {
+              @if (page === -1) {
+                <span class="pagination-ellipsis">...</span>
+              } @else {
+                <button 
+                  class="pagination-btn"
+                  [class.active]="page === currentPage()"
+                  (click)="goToPage(page)"
+                >
+                  {{ page }}
+                </button>
+              }
+            }
+
+            <button 
+              class="pagination-btn" 
+              [disabled]="currentPage() === totalPages()"
+              (click)="goToPage(currentPage() + 1)"
+            >
+              Next &raquo;
+            </button>
+          </div>
+        }
+      }
+    }
+  </section>
+</main>
+
+<footer class="app-footer">
+  <div class="footer-content">
+    <p>© 2025 MEMEMUSEUM | Internet Culture Preservation</p>
+    <nav>
+      <a href="#">About</a>
+      <a href="#">Guidelines</a>
+      <a href="#">API</a>
+      <a routerLink="/meme-del-giorno">Meme del Giorno</a>
+    </nav>
+  </div>
+</footer>
+
+

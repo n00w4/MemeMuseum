@@ -1,8 +1,8 @@
-@import './themes/dark';
-@import './themes/paranoid';
-@import './themes/light';            
+@use './themes/dark';
+@use './themes/paranoid';
+@use './themes/light';            
 
 // === Font ===
 :root {
-    --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-main: 'Inter', 'Comic Neue', system-ui, sans-serif;
 }
