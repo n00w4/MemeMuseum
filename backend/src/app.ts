@@ -55,7 +55,7 @@ const startServer = async () => {
     
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
-      console.log(`Health check: http://localhost:${PORT}/api/v1/health`);
+      console.log(`Status check: http://localhost:${PORT}/api/v1/status`);
       console.log(`API docs: http://localhost:${PORT}/api/v1/docs`);
     });
   } catch (error) {

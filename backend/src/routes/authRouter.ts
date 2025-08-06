@@ -5,7 +5,7 @@ export const authRouter = express.Router();
 
 /**
  * @swagger
- *  /api/v1/login:
+ *  /api/v1/auth/login:
  *    post:
  *      description: User login and authentication
  *      produces:
@@ -34,7 +34,7 @@ authRouter.post("/login", async (req: Request, res: Response, next: NextFunction
   const isAuthenticated = await AuthController.checkCredentials(req);
   if (isAuthenticated) {
     const token = AuthController.issueToken(req.body.usr);
-    res.success("Login successful", { token });
+    res.status(200).json({token: token});
   } else {
     res.fail(401, "Invalid credentials. Try again.");
   }
@@ -42,7 +42,7 @@ authRouter.post("/login", async (req: Request, res: Response, next: NextFunction
 
 /**
  * @swagger
- *  /api/v1/signup:
+ *  /api/v1/auth/signup:
  *    post:
  *      description: User registration
  *      produces:
