@@ -2,6 +2,7 @@ import { User } from "../models/database";
 import Jwt from "jsonwebtoken";
 import { Request } from "express";
 import { ValidationError, UniqueConstraintError } from "sequelize";
+import { randomBytes } from "crypto";
 
 export class AuthController {
   /**
@@ -36,42 +37,43 @@ export class AuthController {
    * @returns {Promise<User>} - A promise that resolves to the created User
    */
   static async saveUser(req: Request): Promise<User | null> {
-  try {
-    if (!req.body?.username || !req.body?.password || !req.body?.email) {
-      throw new Error('Missing required fields in request body');
-    }
+    try {
+      if (!req.body?.username || !req.body?.password || !req.body?.email) {
+        throw new Error("Missing required fields in request body");
+      }
 
-    const { username, password, email } = req.body;
-    
-    if (typeof username !== 'string' || username.trim().length < 3) {
-      throw new Error('Invalid username');
-    }
+      const { username, password, email } = req.body;
 
-    if (typeof password !== 'string' || password.length < 8) {
-      throw new Error('Password must be at least 8 characters');
-    }
+      if (typeof username !== "string" || username.trim().length < 3) {
+        throw new Error("Invalid username");
+      }
 
-    const user = new User({
-      username: username.trim(),
-      password: password,
-      email: email?.toString().trim() || ''
-    });
+      if (typeof password !== "string" || password.length < 8) {
+        throw new Error("Password must be at least 8 characters");
+      }
 
-    return await user.save();
-    
-  } catch (error) {
-    console.error('Error saving user:', error);
-    
-    if (error instanceof UniqueConstraintError) {
-      console.error('Duplicate username or email');
-    } 
-    else if (error instanceof ValidationError) {
-      console.error('Validation failed:', error.errors.map(e => e.message));
+      const user = new User({
+        username: username.trim(),
+        password: password,
+        email: email?.toString().trim() || "",
+      });
+
+      return await user.save();
+    } catch (error) {
+      console.error("Error saving user:", error);
+
+      if (error instanceof UniqueConstraintError) {
+        console.error("Duplicate username or email");
+      } else if (error instanceof ValidationError) {
+        console.error(
+          "Validation failed:",
+          error.errors.map((e) => e.message)
+        );
+      }
+
+      return null;
     }
-    
-    return null;
   }
-}
 
   /**
    * Issues a token to the user
@@ -94,4 +96,12 @@ export class AuthController {
   static isTokenValid(token: string, callback: Jwt.VerifyCallback): void {
     Jwt.verify(token, process.env.TOKEN_SECRET as string, callback);
   }
+
+  /**
+   * Generates a CSRF token
+   * @returns {string} - A string representing the generated CSRF token
+   */
+  static readonly generateCsrfToken = (): string => {
+    return randomBytes(100).toString("base64");
+  };
 }
