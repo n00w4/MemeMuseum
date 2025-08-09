@@ -93,7 +93,7 @@ export class AuthController {
    * @param {Jwt.VerifyCallback} callback - The callback to call if the token is valid
    */
   static isTokenValid(token: string, callback: Jwt.VerifyCallback): void {
-    Jwt.verify(token, process.env.TOKEN_SECRET as string, callback);
+    Jwt.verify(token, process.env.JWT_SECRET as string, callback);
   }
 
   /**
