@@ -23,10 +23,10 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
+app.use(cookieParser()); // Cookie parsing middleware
 app.use(morgan("dev")); // logging middleware
 app.use(cors(corsOptions)); // CORS middleware
 app.use(express.json()); // JSON parsing middleware
-app.use(cookieParser()); // Cookie parsing middleware
 app.use(responseWrapper); // Response wrapper middleware
 
 // OpenAPI specs
@@ -46,13 +46,13 @@ app.use("/api/v1/docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 // routes
 app.use(apiRouter);
 
-// error handler middleware
-app.use(errorHandler);
-
 // 404 handler
 app.use((req: express.Request, res: express.Response) => {
   res.status(404).json({ message: "Route not found" });
 });
+
+// error handler middleware
+app.use(errorHandler);
 
 const startServer = async () => {
   try {

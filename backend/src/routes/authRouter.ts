@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
 import { AuthController } from "../controllers/authController";
+import { enforceAuthentication } from "../middlewares/authorization";
 
 export const authRouter = express.Router();
 
@@ -37,12 +38,11 @@ authRouter.post(
     if (isAuthenticated) {
       const token = AuthController.issueToken(req.body.username);
 
-      // Imposta il token come cookie HttpOnly
-      res.cookie("authToken", token, {
+      res.cookie("sessionToken", token, {
         httpOnly: true,
-        secure: false, // Per sviluppo
+        secure: false, // has to be HTTPS to be true
         sameSite: "lax",
-        maxAge: 24 * 60 * 60 * 1000, // 1 giorno
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
       });
 
       res.success("Login successful", null, 200);
@@ -51,6 +51,30 @@ authRouter.post(
     }
   }
 );
+
+/**
+ * @swagger
+ * /api/v1/auth/is-authenticated:
+ *  get:
+ *    description: Check if the user is authenticated
+ *    responses:
+ *      200:
+ *        description: User is authenticated
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                authenticated:
+ *                  type: boolean
+ *                  example: true
+ *                user:
+ *                  type: string
+ *                  example: user_example
+ */
+authRouter.get('/is-authenticated', enforceAuthentication, (req: Request, res: Response, next: NextFunction) => {
+  res.status(200).json({ authenticated: true, user: (req as any).username});
+});
 
 /**
  * @swagger
@@ -75,7 +99,7 @@ authRouter.post("/logout", (req: Request, res: Response, next: NextFunction) => 
  *      200:
  *        description: CSRF token generated
  */
-authRouter.get("/csrf-token", (req: Request, res: Response) => {
+authRouter.get("/csrf-token", (req: Request, res: Response, next: NextFunction) => {
     const csrfToken = AuthController.generateCsrfToken();
     
     res.cookie('XSRF-TOKEN', csrfToken, {

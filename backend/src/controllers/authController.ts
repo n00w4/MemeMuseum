@@ -12,7 +12,6 @@ export class AuthController {
    */
   static async checkCredentials(req: Request): Promise<boolean> {
     try {
-      console.log(req.body.username, req.body.password);
       if (!req.body?.username || !req.body?.password) {
         return false;
       }

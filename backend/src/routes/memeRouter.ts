@@ -5,6 +5,7 @@ import { CommentController } from "../controllers/commentController";
 import { upload } from "../middlewares/upload";
 import { MulterError } from "multer";
 import { enforceAuthentication } from "../middlewares/authorization";
+import { verifyCsrfToken } from "../middlewares/csrf";
 
 export const memeRouter = express.Router();
 
@@ -64,7 +65,7 @@ memeRouter.get("/memes", async (req: Request, res: Response, next: NextFunction)
  *       500:
  *         description: Internal server error
  */
-memeRouter.post('/memes', enforceAuthentication, (req: Request, res: Response, next: NextFunction) => {
+memeRouter.post('/memes', enforceAuthentication,  verifyCsrfToken, async (req: Request, res: Response, next: NextFunction) => {
   upload.single('image')(req, res, async (err) => {
     try {
       if (err instanceof MulterError) {
@@ -200,7 +201,7 @@ memeRouter.get("/memes/:id", async (req: Request, res: Response, next: NextFunct
  *        500:
  *          description: Internal server error
  */
-memeRouter.post("/memes/:id/vote", enforceAuthentication,async (req: Request, res: Response, next: NextFunction) => {
+memeRouter.post("/memes/:id/vote", enforceAuthentication, verifyCsrfToken, async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (req.body.value !== 1 && req.body.value !== -1) {
         return res.fail(400, 'Value must be 1 or -1');
@@ -245,7 +246,7 @@ memeRouter.post("/memes/:id/vote", enforceAuthentication,async (req: Request, re
  *        500:
  *          description: Internal server error
  */
-memeRouter.post("/memes/:id/comment", enforceAuthentication, async (req: Request, res: Response, next: NextFunction) => {
+memeRouter.post("/memes/:id/comment", enforceAuthentication, verifyCsrfToken, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const comment = await CommentController.saveComment(req);
         res.success('Comment created successfully', comment);

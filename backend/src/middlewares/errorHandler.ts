@@ -15,13 +15,13 @@ function errorHandler(err: any, req: Request, res: Response, next: NextFunction)
             code: err.status,
             description: err.message,
         });
+    } else {
+        console.error('Unhandled error:', err);
+        res.status(500).json({
+            code: 500,
+            description: 'Internal Server Error'
+        });
     }
-
-    console.error('Unhandled error:', err);
-    res.status(500).json({
-        code: 500,
-        description: 'Internal Server Error'
-    });
 }
 
 export default errorHandler;
