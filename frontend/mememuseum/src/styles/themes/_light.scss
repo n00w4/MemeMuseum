@@ -1,16 +1,14 @@
-.theme-light {
-    --color-bg: #faf6f2;                
-    --color-card: #ffffff;              
-    --color-text-primary: #2e2a27;      
-    --color-text-secondary: #5e5a57;    
-
-    --color-accent1: #e7a66c;           
-    --color-accent2: #5b8dbd;           
-    --color-accent3: #ff6b3d;           
-    --color-accent2-rgb: 91, 141, 189;
-
-    --color-error: #d64545;             
-    --color-success: #2c9c7a;           
-    --color-input-bg: #f0ece8;          
-    --color-border: #d6cfc9;     
+@mixin theme-light {
+  --color-bg: #faf6f2;
+  --color-card: #ffffff;
+  --color-text-primary: #2e2a27;
+  --color-text-secondary: #5e5a57;
+  --color-accent1: #e7a66c;
+  --color-accent2: #5b8dbd;
+  --color-accent3: #ff6b3d;
+  --color-accent2-rgb: 91, 141, 189;
+  --color-error: #d64545;
+  --color-success: #2c9c7a;
+  --color-input-bg: #f0ece8;
+  --color-border: #d6cfc9;
 }

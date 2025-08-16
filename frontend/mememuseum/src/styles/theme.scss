@@ -1,8 +1,25 @@
 @use './themes/dark';
 @use './themes/paranoid';
-@use './themes/light';            
+@use './themes/light';
 
 // === Font ===
 :root {
-    --font-main: 'Inter', 'Comic Neue', system-ui, sans-serif;
+  --font-main: 'Inter', 'Comic Neue', system-ui, sans-serif;
+}
+
+* {
+  font-family: var(--font-main);
+}
+
+// === Themes ===
+.theme-dark {
+  @include dark.theme-dark;
+}
+
+.theme-light {
+  @include light.theme-light;
+}
+
+.theme-paranoid {
+  @include paranoid.theme-paranoid;
 }

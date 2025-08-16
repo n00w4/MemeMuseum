@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { Meme } from '../home';
+import { CommonModule } from '@angular/common';
+import { Meme } from '../../../shared/models/meme.model';
 
 @Component({
   selector: 'app-meme-card',
   standalone: true,
-  imports: [CommonModule, NgOptimizedImage],
+  imports: [CommonModule],
   templateUrl: './meme-card.html',
   styleUrls: ['./meme-card.scss']
 })
@@ -17,9 +17,5 @@ export class MemeCardComponent {
     if (rating > 100) return 'high-rating';
     if (rating > 0) return 'medium-rating';
     return 'low-rating';
-  }
-  
-  calculateRating(): number {
-    return this.meme.upvotes - this.meme.downvotes;
   }
 }

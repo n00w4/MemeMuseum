@@ -1,0 +1,57 @@
+<div class="meme-card">
+  <div class="meme-image">
+    <img
+      [src]="meme.imageUrl"
+      width="300"
+      height="200"
+      [alt]="meme.title"
+      priority
+    />
+  </div>
+
+  <div class="meme-info">
+    <h3 class="meme-title">{{ meme.title }}</h3>
+
+    <div class="meme-meta">
+      <span class="uploader">By {{ meme.uploader }}</span>
+      <span class="date">{{ meme.uploadDate | date : "shortDate" }}</span>
+    </div>
+
+    <div class="meme-stats">
+      <div class="rating" [class]="getRatingClass(meme.rating)">
+        {{ meme.rating }}
+      </div>
+    </div>
+
+    <div class="meme-tags">
+      @for (tag of meme.tags; track tag) {
+      <span class="tag">{{ tag }}</span>
+      }
+    </div>
+
+    @if (isLoggedIn) {
+    <div class="meme-actions">
+      <button class="action-btn upvote">
+        <svg class="action-icon" viewBox="0 0 24 24">
+          <path d="M12 3L2 14h7v7h6v-7h7z" />
+        </svg>
+        Upvote
+      </button>
+      <button class="action-btn downvote">
+        <svg class="action-icon" viewBox="0 0 24 24">
+          <path d="M12 21L2 10h7V3h6v7h7z" />
+        </svg>
+        Downvote
+      </button>
+      <button class="action-btn comment">
+        <svg class="action-icon" viewBox="0 0 24 24">
+          <path
+            d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"
+          />
+        </svg>
+        Comment
+      </button>
+    </div>
+    }
+  </div>
+</div>

@@ -2,37 +2,38 @@
   background-color: var(--color-card);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   border: 1px solid var(--color-border);
-  
+
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
   }
-  
+
   .meme-image {
     width: 100%;
     height: 200px;
     overflow: hidden;
-    
+
     img {
       width: 100%;
-      height: 100%;
+      height: auto;
       object-fit: cover;
       display: block;
     }
   }
-  
+
   .meme-info {
     padding: 1rem;
-    
+
     .meme-title {
       margin: 0 0 0.5rem 0;
       color: var(--color-text-primary);
       font-size: 1.1rem;
+      line-height: 1.3;
     }
-    
+
     .meme-meta {
       display: flex;
       justify-content: space-between;
@@ -40,56 +41,42 @@
       color: var(--color-text-secondary);
       margin-bottom: 0.75rem;
     }
-    
+
     .meme-stats {
       display: flex;
       align-items: center;
       gap: 1rem;
       margin-bottom: 1rem;
-      
+
       .rating {
         font-weight: bold;
         padding: 0.25rem 0.75rem;
         border-radius: 20px;
         font-size: 0.9rem;
-        
+
         &.high-rating {
           background-color: rgba(var(--color-accent2-rgb), 0.2);
           color: var(--color-accent2);
         }
-        
+
         &.medium-rating {
           background-color: rgba(255, 193, 7, 0.2);
           color: #ffc107;
         }
-        
+
         &.low-rating {
           background-color: rgba(255, 76, 145, 0.2);
           color: var(--color-error);
         }
       }
-      
-      .votes {
-        display: flex;
-        gap: 0.75rem;
-        font-size: 0.9rem;
-        
-        .upvotes {
-          color: var(--color-success);
-        }
-        
-        .downvotes {
-          color: var(--color-error);
-        }
-      }
     }
-    
+
     .meme-tags {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
       margin-bottom: 1rem;
-      
+
       .tag {
         background-color: var(--color-input-bg);
         color: var(--color-text-secondary);
@@ -98,13 +85,16 @@
         font-size: 0.8rem;
       }
     }
-    
+
     .meme-actions {
       display: flex;
-      gap: 0.5rem;
-      
+      gap: 0.25rem;
+      flex-wrap: wrap;
+      justify-content: center;
+
       .action-btn {
-        flex: 1;
+        flex: 1 1 calc(33% - 0.25rem);
+        min-width: 80px;
         padding: 0.5rem;
         border: 1px solid var(--color-border);
         background-color: transparent;
@@ -114,27 +104,50 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.25rem;
+        gap: 0.5rem;
         font-size: 0.9rem;
         transition: all 0.2s ease;
-        
+        box-sizing: border-box;
+
         &:hover {
           border-color: var(--color-accent2);
           color: var(--color-accent2);
         }
-        
+
         &.upvote:hover {
           background-color: rgba(194, 255, 219, 0.1);
         }
-        
+
         &.downvote:hover {
           background-color: rgba(255, 76, 145, 0.1);
         }
-        
+
         &.comment:hover {
           background-color: rgba(255, 130, 216, 0.1);
+        }
+
+        &.upvote:hover .action-icon {
+          fill: var(--color-success);
+        }
+
+        &.downvote:hover .action-icon {
+          fill: var(--color-error);
+        }
+
+        &.comment:hover .action-icon {
+          fill: var(--color-accent2);
+        }
+
+        .action-icon {
+          width: 18px;
+          height: 18px;
+          min-width: 18px;
+          min-height: 18px;
+          fill: currentColor;
+          transition: fill 0.2s ease;
         }
       }
     }
   }
 }
+

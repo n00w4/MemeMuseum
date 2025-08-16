@@ -1,16 +1,14 @@
-.theme-paranoid{
-    --color-bg: #0b0c0f;                
-    --color-card: #161822;              
-    --color-text-primary: #f2f2f2;      
-    --color-text-secondary: #c7c7d1;    
-
-    --color-accent1: #4f9dff;           
-    --color-accent2: #ff4fa8;           
-    --color-accent3: #ff784f;           
-    --color-accent2-rgb: 255, 79, 168;
-
-    --color-error: #ff5470;             
-    --color-success: #adffcf;           
-    --color-input-bg: #1d1f2b;          
-    --color-border: #4b4d59;     
+@mixin theme-paranoid {
+  --color-bg: #0b0c0f;
+  --color-card: #161822;
+  --color-text-primary: #f2f2f2;
+  --color-text-secondary: #c7c7d1;
+  --color-accent1: #4f9dff;
+  --color-accent2: #ff4fa8;
+  --color-accent3: #ff784f;
+  --color-accent2-rgb: 255, 79, 168;
+  --color-error: #ff5470;
+  --color-success: #adffcf;
+  --color-input-bg: #1d1f2b;
+  --color-border: #4b4d59;
 }
