@@ -19,15 +19,20 @@ export class Meme extends Model<MemeAttributes, MemeCreationAttributes> implemen
   public image!: string;
   public user_id!: number;
 
-  // Associations
   public readonly user?: User;
   public readonly tags?: Tag[];
   public readonly votes?: Vote[];
   public readonly comments?: Comment[];
 
-  // Timestamps
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  public setTags!: (tags: Tag[] | number[]) => Promise<void>;
+  public addTag!: (tag: Tag) => Promise<void>;
+  public removeTag!: (tag: Tag) => Promise<void>;
+  public hasTag!: (tag: Tag) => Promise<boolean>;
+  public countTags!: () => Promise<number>;
+  public getTags!: () => Promise<Tag[]>;
 }
 
 export function initMemeModel(sequelize: Sequelize): void {

@@ -24,7 +24,8 @@ export const memeRouter = express.Router();
  */
 memeRouter.get("/memes", async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const memes = await MemeController.getAllMemes();
+        const memes = await MemeController.getAllMemes(req);
+        console.log(memes.memes[0].rating);
         res.success('Memes retrieved successfully', memes);
     } catch (err) {
         console.error(err);

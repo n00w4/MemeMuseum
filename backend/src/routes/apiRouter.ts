@@ -5,7 +5,7 @@ import { memeRouter } from './memeRouter';
 const apiRouter = Router();
 
 apiRouter.use('/api/v1/auth', authRouter);
-apiRouter.use('/api/v1/memes', memeRouter);
+apiRouter.use('/api/v1/', memeRouter);
 
 // status check route
 apiRouter.get('/api/v1/status', (req: Request, res: Response) => {

@@ -36,8 +36,8 @@ Comment.belongsTo(Meme, { foreignKey: "meme_id", as: "meme" });
 User.hasMany(Comment, { foreignKey: "user_id", as: "comments" });
 Comment.belongsTo(User, { foreignKey: "user_id", as: "user" });
 
-Meme.belongsToMany(Tag, { through: 'meme_tags', foreignKey: 'meme_id' });
-Tag.belongsToMany(Meme, { through: 'meme_tags', foreignKey: 'tag_id' });
+Meme.belongsToMany(Tag, { through: 'meme_tags', foreignKey: 'meme_id', as: 'tags' });
+Tag.belongsToMany(Meme, { through: 'meme_tags', foreignKey: 'tag_id', as: 'memes' });
 
 export const syncDatabase = async (force: boolean = false): Promise<void> => {
   try {
