@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
-import { AuthController } from "../controllers/authController";
-import { enforceAuthentication } from "../middlewares/authorization";
+import { AuthController } from "../controllers/auth.controller";
+import { enforceAuthentication } from "../middlewares/enforceAuthentication";
 
 export const authRouter = express.Router();
 
@@ -106,6 +106,7 @@ authRouter.get("/csrf-token", (req: Request, res: Response, next: NextFunction) 
         httpOnly: false,
         secure: false,
         sameSite: 'lax',
+        maxAge: 3600000 // 1 hour
     });
     
     res.status(200).json({ csrfToken });

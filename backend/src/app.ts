@@ -13,7 +13,7 @@ import errorHandler from "./middlewares/errorHandler";
 import responseWrapper from "./middlewares/responseWrapper";
 
 // routes imports
-import apiRouter from "./routes/apiRouter";
+import apiRouter from "./routes/api.router";
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;

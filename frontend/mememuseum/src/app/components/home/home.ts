@@ -2,14 +2,13 @@ import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { MemeCardComponent } from '../memes/meme-card/meme-card';
-import { AuthService } from '../../core/services/auth.service';
 import { Subscription } from 'rxjs';
-import {
-  MemeService,
-  GetMemesResponse,
-} from '../memes/services/meme.service';
+import { MemeService, GetMemesResponse } from '../memes/services/meme.service';
+import { AuthService } from '../../core/services/auth.service';
+import { UserService } from '../../core/services/user.service';
+import { MemeCardComponent } from '../memes/meme-card/meme-card';
 import { Meme } from '../../shared/models/meme.model';
+import { User } from '../../shared/models/user.model';
 
 @Component({
   selector: 'app-home',
@@ -21,7 +20,11 @@ import { Meme } from '../../shared/models/meme.model';
 export class HomeComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly memeService = inject(MemeService);
-  authSubscription: Subscription | undefined;
+  private readonly userService = inject(UserService);
+  private authSubscription: Subscription | undefined;
+  private userSubscription: Subscription | null = null;
+
+  currentUser: User | null = null;
 
   memes = signal<Meme[]>([]);
   tags = signal<string[]>([]);
@@ -57,24 +60,67 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (this.authSubscription) {
       this.authSubscription.unsubscribe();
     }
+
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
   }
 
   ngOnInit() {
-    this.loadMemes();
+    this.authService.getCsrfToken().subscribe({
+      next: () => {
+        this.userService.loadCurrentUser().subscribe({
+          next: (user) => {
+            if (user) {
+              this.isLoggedIn.set(true);
+            }
+            this.loadMemes();
+          },
+          error: (error) => {
+            console.error('Error loading user in home:', error);
+            this.isLoggedIn.set(false);
+            this.loadMemes();
+          },
+        });
+      },
+      error: (error) => {
+        console.error('Error getting CSRF token:', error);
+        this.userService.loadCurrentUser().subscribe({
+          next: (user) => {
+            if (user) {
+              this.isLoggedIn.set(true);
+            }
+            this.loadMemes();
+          },
+          error: (error) => {
+            console.error('Error loading user in home:', error);
+            this.isLoggedIn.set(false);
+            this.loadMemes();
+          },
+        });
+      },
+    });
 
     this.authSubscription = this.authService.authState$.subscribe({
       next: (authenticated: boolean | null) => {
         if (authenticated !== null) {
           this.isLoggedIn.set(authenticated);
+          if (authenticated) {
+            this.userService.loadCurrentUser().subscribe();
+          }
         }
       },
       error: (error) => {
         console.error(
-          "Errore nell'osservazione dello stato auth nel HomeComponent:",
+          "Error in authState subscription in HomeComponent:",
           error
         );
         this.isLoggedIn.set(false);
       },
+    });
+
+    this.userSubscription = this.userService.currentUser$.subscribe((user) => {
+      this.currentUser = user;
     });
   }
 
@@ -94,7 +140,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (response: GetMemesResponse) => {
-          
           if (Array.isArray(response?.memes)) {
             this.memes.set(response.memes);
           } else {
@@ -102,28 +147,30 @@ export class HomeComponent implements OnInit, OnDestroy {
               'API response memes is not an array:',
               response?.memes
             );
-            
+
             this.memes.set([]);
           }
-          
+
           this.totalItems.set(response?.totalItems ?? 0);
           this.totalPages.set(response?.totalPages ?? 0);
           this.generatePageNumbers();
           this.isLoading.set(false);
         },
         error: (error: any) => {
-          console.error('Errore nel caricamento dei meme nel HomeComponent:', error);
+          console.error(
+            'Error loading memes in HomeComponent:',
+            error
+          );
 
           if (error instanceof Error) {
-            console.error('Messaggio di errore dal servizio:', error.message);
+            console.error('Error message ', error.message);
           }
-          
+
           this.memes.set([]);
           this.totalItems.set(0);
           this.totalPages.set(0);
-          this.generatePageNumbers(); 
+          this.generatePageNumbers();
           this.isLoading.set(false);
-          
         },
       });
   }

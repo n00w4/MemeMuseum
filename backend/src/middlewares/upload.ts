@@ -23,8 +23,6 @@ export const upload = multer({
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      // Pass null as first parameter and false as second to reject the file
-      // The error will be handled by multer's error handling
       cb(null, false);
     }
   }

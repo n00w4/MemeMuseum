@@ -31,18 +31,30 @@
 
     @if (isLoggedIn) {
     <div class="meme-actions">
-      <button class="action-btn upvote">
+      <button 
+        class="action-btn upvote"
+        [class.active]="isUpvoteActive()"
+        [disabled]="isLoading()"
+        (click)="handleVote(1)"
+      >
         <svg class="action-icon" viewBox="0 0 24 24">
           <path d="M12 3L2 14h7v7h6v-7h7z" />
         </svg>
         Upvote
       </button>
-      <button class="action-btn downvote">
+      
+      <button 
+        class="action-btn downvote"
+        [class.active]="isDownvoteActive()"
+        [disabled]="isLoading()"
+        (click)="handleVote(-1)"
+      >
         <svg class="action-icon" viewBox="0 0 24 24">
           <path d="M12 21L2 10h7V3h6v7h7z" />
         </svg>
         Downvote
       </button>
+      
       <button class="action-btn comment">
         <svg class="action-icon" viewBox="0 0 24 24">
           <path

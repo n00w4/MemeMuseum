@@ -1,11 +1,13 @@
 import { Router, Request, Response } from 'express';
-import { authRouter } from './authRouter';
-import { memeRouter } from './memeRouter';
+import { authRouter } from './auth.router';
+import { memeRouter } from './meme.router';
+import { userRouter } from './user.router';
 
 const apiRouter = Router();
 
 apiRouter.use('/api/v1/auth', authRouter);
 apiRouter.use('/api/v1/', memeRouter);
+apiRouter.use('/api/v1/users', userRouter);
 
 // status check route
 apiRouter.get('/api/v1/status', (req: Request, res: Response) => {

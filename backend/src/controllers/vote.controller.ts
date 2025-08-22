@@ -15,11 +15,11 @@ export class VoteController {
             }
 
             const voteValue = Number(req.body.value);
-            if (![-1, 0, 1].includes(voteValue)) {
-                throw new Error('Invalid vote value. Must be -1, 0, or 1');
+            if (![-1, 1].includes(voteValue)) {
+                throw new Error('Invalid vote value. Must be -1 or 1');
             }
 
-            const existingVote = await Vote.findOne({
+            let existingVote = await Vote.findOne({
                 where: {
                     user_id: req.body.user_id,
                     meme_id: req.body.meme_id

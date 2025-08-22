@@ -1,10 +1,11 @@
 import express, { Request, Response, NextFunction } from "express";
-import { MemeController } from "../controllers/memeController";
-import { VoteController } from "../controllers/voteController";
-import { CommentController } from "../controllers/commentController";
+import { MemeController } from "../controllers/meme.controller";
+import { VoteController } from "../controllers/vote.controller";
+import { CommentController } from "../controllers/comment.controller";
 import { upload } from "../middlewares/upload";
 import { MulterError } from "multer";
-import { enforceAuthentication } from "../middlewares/authorization";
+import { enforceAuthentication } from "../middlewares/enforceAuthentication";
+import { optionalAuthentication } from "../middlewares/optionalAuthentication";
 import { verifyCsrfToken } from "../middlewares/csrf";
 
 export const memeRouter = express.Router();
@@ -22,10 +23,9 @@ export const memeRouter = express.Router();
  *        500:
  *          description: Internal server error
  */
-memeRouter.get("/memes", async (req: Request, res: Response, next: NextFunction) => {
+memeRouter.get("/memes", optionalAuthentication, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const memes = await MemeController.getAllMemes(req);
-        console.log(memes.memes[0].rating);
         res.success('Memes retrieved successfully', memes);
     } catch (err) {
         console.error(err);
@@ -164,7 +164,7 @@ memeRouter.get("/meme-of-the-day", async (req: Request, res: Response, next: Nex
  */
 memeRouter.get("/memes/:id", async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const meme = await MemeController.getMemes(parseInt(req.params.id));
+        const meme = await MemeController.getAllMemes(req);
         meme ?? res.fail(404, 'Meme not found');
         res.success('Memes retrieved successfully', meme);
     } catch (err) {
@@ -212,6 +212,56 @@ memeRouter.post("/memes/:id/vote", enforceAuthentication, verifyCsrfToken, async
     } catch (err) {
         console.error(err);
         res.fail(500, 'Could not retrieve memes');
+    }
+});
+
+/**
+ * @swagger
+ *  /api/v1/memes/{id}/vote:
+ *    delete:
+ *      description: Remove a vote from a meme
+ *      produces:
+ *        - application/json
+ *      requestBody:
+ *        description: Vote data
+ *        required: true
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                user_id:
+ *                  type: number
+ *                  example: 1
+ *                meme_id:
+ *                  type: number
+ *                  example: 1
+ *      responses:
+ *        200:
+ *          description: Vote removed successfully
+ *        400:
+ *          description: Bad request
+ *        404:
+ *          description: Vote not found
+ *        500:
+ *          description: Internal server error
+ */
+memeRouter.delete("/memes/:id/vote", enforceAuthentication, verifyCsrfToken, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { user_id, meme_id } = req.body;
+      if (!user_id || !meme_id) {
+        return res.fail(400, 'User ID and Meme ID are required');
+      }
+      
+      const deleted = await VoteController.deleteVote(req);
+      if (deleted) {
+        res.success('Vote removed successfully', deleted);
+      } else {
+        res.fail(404, 'Vote not found');
+      }
+    } catch (err) {
+        console.error(err);
+        res.fail(500, 'Could not remove vote');
     }
 });
 

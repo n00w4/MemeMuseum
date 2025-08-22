@@ -47,9 +47,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   onSubmit() {
     if (this.loginForm.invalid) return;
-    this.loading = true;
-    this.errorMessage = null;
-    this.successMessage = null;
+    this.prepareForLogin();
 
     if (this.loginSubscription) {
       this.loginSubscription.unsubscribe();
@@ -58,22 +56,30 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.loginSubscription = this.authService
       .login(this.loginForm.value)
       .subscribe({
-        next: (authenticated) => {
-          if (authenticated) {
-            this.successMessage = 'Accesso effettuato con successo!';
-            this.loading = false;
-            this.redirectAfterLogin();
-          } else {
-            this.errorMessage =
-              "Login riuscito, ma impossibile verificare l'autenticazione.";
-            this.loading = false;
-          }
+        next: () => {
+          this.onLoginSuccess();
         },
         error: (err) => {
-          this.errorMessage = err || "Errore durante l'accesso.";
-          this.loading = false;
+          this.onLoginError(err);
         },
       });
+  }
+
+  private prepareForLogin(): void {
+    this.loading = true;
+    this.errorMessage = null;
+    this.successMessage = null;
+  }
+
+  private onLoginSuccess(): void {
+    this.successMessage = 'Logged in successfully!';
+    this.loading = false;
+    this.redirectAfterLogin();
+  }
+
+  private onLoginError(err: any): void {
+    this.errorMessage = err || "Error during login. Please try again.";
+    this.loading = false;
   }
 
   private getReturnUrl(): string {
@@ -102,10 +108,15 @@ export class LoginComponent implements OnInit, OnDestroy {
   private redirectAfterLogin(): void {
     setTimeout(() => {
       const returnUrl = this.getReturnUrl();
-      this.router.navigateByUrl(returnUrl).catch((error) => {
-        console.error('Navigation error:', error);
-        this.router.navigate(['/home']);
-      });
+      this.router
+        .navigateByUrl(returnUrl)
+        .then(() => {
+          this.authService.refreshAuthStatus().subscribe();
+        })
+        .catch((error) => {
+          console.error('Navigation error:', error);
+          this.router.navigate(['/home']);
+        });
     }, 1000);
   }
 
@@ -118,11 +129,11 @@ export class LoginComponent implements OnInit, OnDestroy {
       next: () => {
         this.loginForm.reset();
         this.successMessage = null;
-        this.errorMessage = 'Sei stato disconnesso';
+        this.errorMessage = 'You have been logged out successfully.';
         this.router.navigate(['/login']);
       },
       error: (err) => {
-        this.errorMessage = err.message || 'Errore durante il logout.';
+        this.errorMessage = err.message || 'Error during logout.';
       },
     });
   }

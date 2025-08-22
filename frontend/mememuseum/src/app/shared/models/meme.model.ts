@@ -1,9 +1,13 @@
+import { Vote } from "./vote.model";
+
 export interface Meme {
-  id: string;
+  id: number;
   title: string;
   imageUrl: string;
   uploadDate: Date;
   rating: number;
   tags: string[];
   uploader: string;
+  userVote?: number;
+  Votes?: Vote[];
 }

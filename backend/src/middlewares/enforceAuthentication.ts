@@ -1,5 +1,5 @@
 import { ApiError } from "../common/ApiError";
-import { AuthController } from "../controllers/authController";
+import { AuthController } from "../controllers/auth.controller";
 import { RequestHandler } from 'express';
 
 /**

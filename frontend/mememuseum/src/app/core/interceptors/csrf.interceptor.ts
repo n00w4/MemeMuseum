@@ -18,13 +18,16 @@ export function csrfInterceptor(
 ): Observable<HttpEvent<unknown>> {
   const csrfToken = getCookie('XSRF-TOKEN');
 
-  if (csrfToken && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
-    const csrfReq = req.clone({
-      setHeaders: {
-        'X-XSRF-TOKEN': csrfToken,
-      },
+  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
+    const clonedRequest = req.clone({
+      setHeaders: csrfToken ? { 'X-XSRF-TOKEN': csrfToken } : {},
+      withCredentials: true,
     });
-    return next(csrfReq);
+    return next(clonedRequest);
+  }
+
+  if (!req.withCredentials) {
+    return next(req.clone({ withCredentials: true }));
   }
 
   return next(req);
