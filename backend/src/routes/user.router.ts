@@ -39,13 +39,13 @@ userRouter.get(
     try {
       const user = await UserController.getCurrentUserFromToken(req);
       if (user) {
-        res.success("User data retrieved successfully", user, 200);
+        return res.success("User data retrieved successfully", user, 200);
       } else {
-        res.fail(401, "Unauthorized - Invalid token");
+        return res.fail(401, "Unauthorized - Invalid token");
       }
     } catch (error) {
       console.error("Error retrieving user data:", error);
-      res.fail(500, "Internal server error");
+      return res.fail(500, "Internal server error");
     }
   }
 );

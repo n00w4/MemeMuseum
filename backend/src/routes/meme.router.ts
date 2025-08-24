@@ -26,10 +26,10 @@ export const memeRouter = express.Router();
 memeRouter.get("/memes", optionalAuthentication, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const memes = await MemeController.getAllMemes(req);
-        res.success('Memes retrieved successfully', memes);
+        return res.success('Memes retrieved successfully', memes);
     } catch (err) {
         console.error(err);
-        res.fail(500, 'Could not retrieve memes');
+        return res.fail(500, 'Could not retrieve memes');
     }
 });
 
@@ -140,10 +140,10 @@ memeRouter.post('/memes', enforceAuthentication,  verifyCsrfToken, async (req: R
 memeRouter.get("/meme-of-the-day", async (req: Request, res: Response, next: NextFunction) => {
     try {
         const meme = await MemeController.getMemeOfTheDay();
-        res.success('Meme of the day retrieved successfully', meme);
+        return res.success('Meme of the day retrieved successfully', meme);
     } catch (err) {
         console.error(err);
-        res.fail(500, 'Could not retrieve meme of the day');
+        return res.fail(500, 'Could not retrieve meme of the day');
     }
 });
 
@@ -166,10 +166,10 @@ memeRouter.get("/memes/:id", async (req: Request, res: Response, next: NextFunct
     try {
         const meme = await MemeController.getAllMemes(req);
         meme ?? res.fail(404, 'Meme not found');
-        res.success('Memes retrieved successfully', meme);
+        return res.success('Memes retrieved successfully', meme);
     } catch (err) {
         console.error(err);
-        res.fail(500, 'Could not retrieve memes');
+        return res.fail(500, 'Could not retrieve memes');
     }
 });
 
@@ -208,10 +208,10 @@ memeRouter.post("/memes/:id/vote", enforceAuthentication, verifyCsrfToken, async
         return res.fail(400, 'Value must be 1 or -1');
       }
       const vote = await VoteController.saveVote(req);
-      res.success('Vote assigned successfully', vote);
+      return res.success('Vote assigned successfully', vote);
     } catch (err) {
         console.error(err);
-        res.fail(500, 'Could not retrieve memes');
+        return res.fail(500, 'Could not retrieve memes');
     }
 });
 
@@ -255,13 +255,30 @@ memeRouter.delete("/memes/:id/vote", enforceAuthentication, verifyCsrfToken, asy
       
       const deleted = await VoteController.deleteVote(req);
       if (deleted) {
-        res.success('Vote removed successfully', deleted);
+        return res.success('Vote removed successfully', deleted);
       } else {
-        res.fail(404, 'Vote not found');
+        return res.fail(404, 'Vote not found');
       }
     } catch (err) {
         console.error(err);
-        res.fail(500, 'Could not remove vote');
+        return res.fail(500, 'Could not remove vote');
+    }
+});
+
+
+memeRouter.get("/memes/:id/comments", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const memeId = parseInt(req.params.id, 10);
+        if (isNaN(memeId)) {
+            return res.fail(400, 'Invalid meme ID');
+        }
+
+        const comments = await CommentController.getComments(memeId);
+
+        return res.success('Comments fetched successfully', comments);
+    } catch (err) {
+        console.error('Error fetching comments:', err);
+        return res.fail(500, 'Could not fetch comments');
     }
 });
 
@@ -297,12 +314,12 @@ memeRouter.delete("/memes/:id/vote", enforceAuthentication, verifyCsrfToken, asy
  *        500:
  *          description: Internal server error
  */
-memeRouter.post("/memes/:id/comment", enforceAuthentication, verifyCsrfToken, async (req: Request, res: Response, next: NextFunction) => {
+memeRouter.post("/memes/:id/create-comment", enforceAuthentication, verifyCsrfToken, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const comment = await CommentController.saveComment(req);
-        res.success('Comment created successfully', comment);
+        return res.success('Comment created successfully', comment);
     } catch (err) {
         console.error(err);
-        res.fail(500, 'Could not create comment');
+        return res.fail(500, 'Could not create comment');
     }
 });

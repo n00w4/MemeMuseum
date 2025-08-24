@@ -4,12 +4,16 @@ import { ValidationError, Op } from "sequelize";
 
 export class CommentController {
     /**
-     * Retrieves all comments from the database
+     * Retrieves all comments from the database for a meme
+     * @param {number} id - The ID of the meme
      * @returns {Promise<Comment[]>} - A promise that resolves to an array of comments
      */
-    static async getAllComments(): Promise<Comment[]> {
+    static async getAllComments(id: number): Promise<Comment[]> {
         try {
-            return await Comment.findAll();
+            return await Comment.findAll({ 
+                where: { meme_id: id },
+                order: [['createdAt', 'DESC']]
+            });
         } catch (error) {
             console.error('Failed to fetch comments:', error);
             return [];
@@ -17,23 +21,19 @@ export class CommentController {
     }
 
     /**
-     * Retrieves comments from the database
-     * @param {number} limit - The maximum number of comments to retrieve
+     * Retrieves comments from the database for a meme with a limit
+     * @param {number} id - The ID of the meme
      * @returns {Promise<Comment[]>} - A promise that resolves to an array of comments
      */
-    static async getComments(limit: number): Promise<Comment[]> {
+    static async getComments(id: number): Promise<Comment[]> {
         try {
-            if (!Number.isInteger(limit)) {
-                console.warn('Invalid limit parameter:', limit);
-                limit = 10;
-            }
-            
-            return await Comment.findAll({ 
-                limit: Math.min(limit, 100),
+            return await Comment.findAll({
+                where: { meme_id: id },
+                limit: 10,
                 order: [['createdAt', 'DESC']]
             });
         } catch (error) {
-            console.error(`Error fetching ${limit} comments:`, error);
+            console.error(`Error fetching comments:`, error);
             return [];
         }
     }

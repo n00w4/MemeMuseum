@@ -45,9 +45,9 @@ authRouter.post(
         maxAge: 24 * 60 * 60 * 1000, // 1 day
       });
 
-      res.success("Login successful", null, 200);
+      return res.success("Login successful", null, 200);
     } else {
-      res.fail(401, "Invalid credentials. Try again.");
+      return res.fail(401, "Invalid credentials. Try again.");
     }
   }
 );
@@ -100,16 +100,16 @@ authRouter.post("/logout", (req: Request, res: Response, next: NextFunction) => 
  *        description: CSRF token generated
  */
 authRouter.get("/csrf-token", (req: Request, res: Response, next: NextFunction) => {
-    const csrfToken = AuthController.generateCsrfToken();
-    
-    res.cookie('XSRF-TOKEN', csrfToken, {
-        httpOnly: false,
-        secure: false,
-        sameSite: 'lax',
-        maxAge: 3600000 // 1 hour
-    });
-    
-    res.status(200).json({ csrfToken });
+  const csrfToken = AuthController.generateCsrfToken();
+  
+  res.cookie('XSRF-TOKEN', csrfToken, {
+      httpOnly: false,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 3600000 // 1 hour
+  });
+  
+  res.status(200).json({ csrfToken });
 });
 
 /**
@@ -147,10 +147,10 @@ authRouter.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = await AuthController.saveUser(req);
-      res.success("User created", user, 201);
+      return res.success("User created", user, 201);
     } catch (err) {
       console.error(err);
-      res.fail(500, "Could not save user");
+      return res.fail(500, "Could not save user");
     }
   }
 );
