@@ -21,8 +21,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly memeService = inject(MemeService);
   private readonly userService = inject(UserService);
-  private authSubscription: Subscription | undefined;
-  private userSubscription: Subscription | null = null;
+  private readonly fb = inject(FormBuilder);
+
+  authSubscription: Subscription | undefined;
+  userSubscription: Subscription | null = null;
 
   currentUser: User | null = null;
 
@@ -42,7 +44,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   searchForm: FormGroup;
   advancedFiltersForm: FormGroup;
 
-  constructor(private readonly fb: FormBuilder) {
+  constructor() {
     this.searchForm = this.fb.group({
       tags: [''],
     });

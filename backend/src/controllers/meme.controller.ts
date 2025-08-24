@@ -15,8 +15,6 @@ export class MemeController {
     req: Request
   ): Promise<{ memes: any[]; totalItems: number; totalPages: number }> {
     try {
-      console.log("=== getAllMemes called ===");
-
       // 1. Extract and validate pagination parameters
       const { limit, offset } = this.extractPaginationParams(req);
 
@@ -26,7 +24,6 @@ export class MemeController {
 
       // 3. Get user ID if authenticated
       const userId = (req as any).user?.id;
-      console.log("Authenticated user ID:", userId);
 
       // 4. Build query clauses
       const { whereClause, includeClause } = this.buildQueryClauses(
@@ -44,20 +41,14 @@ export class MemeController {
         distinct: true,
       });
 
-      console.log("Found memes count:", rows.length);
-      console.log("First meme sample:", rows[0]?.toJSON?.());
-
       // 6. Get IDs of found memes
       const memeIds = rows.map((meme) => meme.id);
-      console.log("Meme IDs:", memeIds);
 
       // 7. Calculate total ratings for each meme
       const votesMap = await this.calculateMemeRatings(memeIds);
-      console.log("Votes map:", Object.fromEntries(votesMap));
 
       // 8. Get user-specific votes (if logged in)
       const userVotesMap = await this.getUserVotes(memeIds, userId);
-      console.log("User votes map:", Object.fromEntries(userVotesMap));
 
       // 9. Transform memes to required format
       const transformedMemes = this.transformMemes(
@@ -65,8 +56,6 @@ export class MemeController {
         votesMap,
         userVotesMap
       );
-
-      console.log("Transformed memes sample:", transformedMemes.slice(0, 2));
 
       // 10. Sort the transformed memes based on sortBy parameter
       const sortedMemes = this.sortTransformedMemes(transformedMemes, sortBy);

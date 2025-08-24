@@ -1,4 +1,4 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, inject, Input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Meme } from '../../../shared/models/meme.model';
 import { VoteService } from '../services/vote.service';
@@ -12,16 +12,16 @@ import { UserService } from '../../../core/services/user.service';
   styleUrls: ['./meme-card.scss']
 })
 export class MemeCardComponent {
+  private readonly voteService = inject(VoteService);
+  private readonly userService = inject(UserService);
+  
   @Input() meme!: Meme;
   @Input() isLoggedIn: boolean = false;
   
+
   userVote = signal<number>(0); // 0 = no vote, 1 = upvote, -1 = downvote
   isLoading = signal(false);
 
-  constructor(
-    private readonly voteService: VoteService,
-    private readonly userService: UserService
-  ) {}
 
   public ngOnInit() {
     if (this.meme.userVote !== undefined) {

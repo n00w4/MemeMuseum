@@ -1,6 +1,6 @@
 import { Comment } from "../models/Comment";
 import { Request } from "express";
-import { ValidationError, Op } from "sequelize"; // Import aggiuntivo per gestire errori specifici
+import { ValidationError, Op } from "sequelize";
 
 export class CommentController {
     /**
