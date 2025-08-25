@@ -1,4 +1,4 @@
-export interface Comment {
+export interface MemeComment {
   id: number;
   content: string;
   user_id: number;

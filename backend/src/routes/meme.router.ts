@@ -265,8 +265,22 @@ memeRouter.delete("/memes/:id/vote", enforceAuthentication, verifyCsrfToken, asy
     }
 });
 
-
-memeRouter.get("/memes/:id/comments", async (req: Request, res: Response, next: NextFunction) => {
+/**
+ * @swagger
+ *  /api/v1/memes/{id}/comments:
+ *    get:
+ *      description: Retrieve comments for a meme
+ *      produces:
+ *        - application/json
+ *      responses:
+ *        200:
+ *          description: Comments fetched successfully
+ *        400:
+ *          description: Bad request
+ *        500:
+ *          description: Internal server error
+ */
+memeRouter.get("/memes/:id/comments", enforceAuthentication, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const memeId = parseInt(req.params.id, 10);
         if (isNaN(memeId)) {

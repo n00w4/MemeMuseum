@@ -31,7 +31,7 @@
 
     @if (isLoggedIn) {
     <div class="meme-actions">
-      <button 
+      <button
         class="action-btn upvote"
         [class.active]="isUpvoteActive()"
         [disabled]="isLoading()"
@@ -42,8 +42,8 @@
         </svg>
         Upvote
       </button>
-      
-      <button 
+
+      <button
         class="action-btn downvote"
         [class.active]="isDownvoteActive()"
         [disabled]="isLoading()"
@@ -54,16 +54,87 @@
         </svg>
         Downvote
       </button>
-      
-      <button class="action-btn comment">
+
+      <button class="action-btn comment" (click)="toggleComments()">
         <svg class="action-icon" viewBox="0 0 24 24">
           <path
             d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"
           />
         </svg>
-        Comment
+        Comment ({{
+          meme.commentsCount !== undefined
+            ? meme.commentsCount
+            : comments().length
+        }})
       </button>
     </div>
-    }
+
+    @if (showComments()) {
+    <div class="meme-comments">
+      @if (commentLoadError()) {
+      <div class="comment-error">
+        {{ commentLoadError() }}
+
+        <button class="retry-btn" (click)="loadComments()">Retry</button>
+      </div>
+      }
+
+      <form
+        class="new-comment-form"
+        (ngSubmit)="submitComment()"
+        #commentForm="ngForm"
+      >
+        <div class="comment-input-wrapper">
+          <textarea
+            class="comment-input"
+            [(ngModel)]="newComment"
+            name="newComment"
+            placeholder="Add a comment..."
+            rows="3"
+            required
+            [disabled]="isCommenting()"
+          ></textarea>
+
+          @if (commentSubmitError()) {
+          <div class="comment-error">
+            {{ commentSubmitError() }}
+          </div>
+          }
+        </div>
+        <div class="comment-actions">
+          <button
+            type="submit"
+            class="submit-comment-btn"
+            [disabled]="
+              isCommenting() || !commentForm.form.valid || !newComment().trim()
+            "
+          >
+            @if (isCommenting()) {
+            <span>Posting...</span>
+            } @else {
+            <span>Post</span>
+            }
+          </button>
+        </div>
+      </form>
+
+      <div class="comments-list">
+        @if (comments().length > 0) { @for (comment of comments(); track
+        comment.id) {
+        <div class="comment">
+          <div class="comment-meta">
+            <span class="comment-author">User {{ comment.user_id }}</span>
+            <span class="comment-date">{{
+              comment.createdAt | date : "dd/MM/yyyy, HH:mm"
+            }}</span>
+          </div>
+          <div class="comment-content">{{ comment.content }}</div>
+        </div>
+        } } @else {
+        <p class="no-comments">No comments yet. Be the first!</p>
+        }
+      </div>
+    </div>
+    } }
   </div>
 </div>

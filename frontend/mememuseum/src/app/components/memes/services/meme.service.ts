@@ -1,9 +1,11 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { catchError, map, Observable } from 'rxjs';
+import { catchError, forkJoin, map, Observable, of, switchMap } from 'rxjs';
 import { Meme } from '../../../shared/models/meme.model';
 import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../../../shared/interfaces/api-response.interface';
+import { MemeComment } from '../../../shared/models/comment.model';
+import { CommentService } from './comment.service';
 
 export interface GetMemesResponse {
   memes: Meme[];
@@ -15,9 +17,36 @@ export interface GetMemesResponse {
   providedIn: 'root',
 })
 export class MemeService {
-  private readonly baseUrl = `${environment.apiBaseUrl}/memes`;
+  private readonly commentService = inject(CommentService);
 
   constructor(private readonly http: HttpClient) {}
+
+  getCommentsForMemes(
+    memeIds: number[]
+  ): Observable<{ [memeId: number]: MemeComment[] }> {
+    if (memeIds.length === 0) {
+      return of({});
+    }
+
+    const commentRequests$ = memeIds.map((id) =>
+      this.commentService.getComments(id).pipe(
+        catchError((error) => {
+          console.error(`Error fetching comments for meme ${id}:`, error);
+          return of([]);
+        })
+      )
+    );
+
+    return forkJoin(commentRequests$).pipe(
+      map((commentsArrays: MemeComment[][]) => {
+        const commentsMap: { [memeId: number]: MemeComment[] } = {};
+        memeIds.forEach((memeId, index) => {
+          commentsMap[memeId] = commentsArrays[index];
+        });
+        return commentsMap;
+      })
+    );
+  }
 
   getMemes(
     page: number,
@@ -47,48 +76,25 @@ export class MemeService {
     }
 
     return this.http
-      .get<ApiResponse<GetMemesResponse>>(this.baseUrl, { params })
+      .get<ApiResponse<GetMemesResponse>>(`${environment.apiMemeUrl}`, { params })
       .pipe(
-        map((response) => {
-          if (
-            response &&
-            typeof response.status === 'number' &&
-            response.status === 200 &&
-            response.data
-          ) {
-            const responseData = response.data;
+        map((response) => response.data),
+        switchMap((memesResponse) => {
+          const memeIds = memesResponse.memes.map((m) => m.id);
 
-            const processedMemes: Meme[] = responseData.memes.map((meme) => {
-              let uploadDate: Date;
-              if (typeof meme.uploadDate === 'string') {
-                uploadDate = new Date(meme.uploadDate);
-              } else {
-                uploadDate = meme.uploadDate;
-              }
-
-              return {
+          return this.getCommentsForMemes(memeIds).pipe(
+            map((commentsMap) => {
+              const memesWithComments = memesResponse.memes.map((meme) => ({
                 ...meme,
-                imageUrl: meme.imageUrl,
-                uploadDate: uploadDate,
-              };
-            });
-
-            return {
-              memes: processedMemes,
-              totalItems: responseData.totalItems,
-              totalPages: responseData.totalPages,
-            };
-          } else {
-            console.error('API response structure unexpected:', response);
-            throw new Error(
-              `API Error: ${response?.message || 'Unknown error'}`
-            );
-          }
+                commentsCount: (commentsMap[meme.id] || []).length,
+              }));
+              return { ...memesResponse, memes: memesWithComments };
+            })
+          );
         }),
         catchError((error) => {
           console.error('HTTP Error in MemeService:', error);
-
-          throw error;
+          return of({ memes: [], totalItems: 0, totalPages: 0 });
         })
       );
   }

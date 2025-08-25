@@ -10,4 +10,5 @@ export interface Meme {
   uploader: string;
   userVote?: number;
   Votes?: Vote[];
+  commentsCount?: number;
 }

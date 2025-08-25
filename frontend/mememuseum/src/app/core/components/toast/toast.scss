@@ -1,0 +1,82 @@
+.toast {
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+  color: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  min-width: 300px;
+  max-width: 500px;
+  opacity: 0;
+  transform: translateY(-20px);
+  animation: fadeInUp 0.3s forwards;
+  position: relative;
+
+  &--success {
+    background-color: #4caf50;
+  }
+
+  &--error {
+    background-color: #f44336;
+  }
+
+  &--info {
+    background-color: #2196f3;
+  }
+
+  &--warning {
+    background-color: #ff9800;
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    margin-right: 0.75rem;
+    .toast__svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+  }
+
+  &__message {
+    flex-grow: 1;
+    font-size: 0.95rem;
+
+    padding-right: 1.5rem;
+  }
+
+  &__close-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+    line-height: 1;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .toast__close-icon {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+  }
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
