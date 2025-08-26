@@ -97,40 +97,40 @@ export class MemeController {
   }
 
   private static buildQueryClauses(
-    tags: string[],
-    startDate: string | null,
-    endDate: string | null
-  ) {
-    const whereClause: any = {};
-    const includeClause: any[] = [
-      {
-        model: Tag,
-        as: "tags",
-        required: false,
-        through: { attributes: [] },
-      },
-    ];
+  tags: string[],
+  startDate: string | null,
+  endDate: string | null
+) {
+  const whereClause: any = {};
+  const includeClause: any[] = [
+    {
+      model: Tag,
+      as: "tags",
+      required: tags.length > 0,
+      through: { attributes: [] },
+    },
+  ];
 
-    // Filter by tags
-    if (tags.length > 0) {
-      whereClause["$tags.name$"] = {
+  if (tags.length > 0) {
+    includeClause[0].where = {
+      name: {
         [Op.in]: tags,
-      };
-    }
-
-    // Filter by date range
-    if (startDate || endDate) {
-      whereClause.createdAt = {};
-      if (startDate) {
-        whereClause.createdAt[Op.gte] = new Date(startDate);
-      }
-      if (endDate) {
-        whereClause.createdAt[Op.lte] = new Date(endDate);
-      }
-    }
-
-    return { whereClause, includeClause };
+      },
+    };
   }
+
+  if (startDate || endDate) {
+    whereClause.createdAt = {};
+    if (startDate) {
+      whereClause.createdAt[Op.gte] = new Date(startDate);
+    }
+    if (endDate) {
+      whereClause.createdAt[Op.lte] = new Date(endDate);
+    }
+  }
+
+  return { whereClause, includeClause };
+}
 
   private static async calculateMemeRatings(memeIds: number[]) {
     if (memeIds.length === 0) return new Map<number, number>();
