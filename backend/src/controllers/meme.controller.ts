@@ -4,16 +4,17 @@ import { Tag } from "../models/Tag";
 import { Op, Sequelize, ValidationError } from "sequelize";
 import { FeaturedMeme } from "../models/FeaturedMeme";
 import { Vote } from "../models/Vote";
+import { MemeDTO } from "../common/MemeDTO";
 
 export class MemeController {
   /**
    * Retrieves all memes from the database with optional filtering and pagination
    * @param {Request} req - Express request object containing query parameters
-   * @returns {Promise<{memes: any[], totalItems: number, totalPages: number}>} - Paginated memes with metadata
+   * @returns {Promise<{memes: MemeDTO[], totalItems: number, totalPages: number}>} - Paginated memes with metadata
    */
   static async getAllMemes(
     req: Request
-  ): Promise<{ memes: any[]; totalItems: number; totalPages: number }> {
+  ): Promise<{ memes: MemeDTO[]; totalItems: number; totalPages: number }> {
     try {
       // 1. Extract and validate pagination parameters
       const { limit, offset } = this.extractPaginationParams(req);
@@ -51,14 +52,17 @@ export class MemeController {
       const userVotesMap = await this.getUserVotes(memeIds, userId);
 
       // 9. Transform memes to required format
-      const transformedMemes = this.transformMemes(
+      const transformedMemes: MemeDTO[] = this.transformMemes(
         rows,
         votesMap,
         userVotesMap
       );
 
       // 10. Sort the transformed memes based on sortBy parameter
-      const sortedMemes = this.sortTransformedMemes(transformedMemes, sortBy);
+      const sortedMemes: MemeDTO[] = this.sortTransformedMemes(
+        transformedMemes,
+        sortBy
+      );
 
       // 11. Calculate total number of pages
       const totalPages = Math.ceil(count / limit);
@@ -97,40 +101,40 @@ export class MemeController {
   }
 
   private static buildQueryClauses(
-  tags: string[],
-  startDate: string | null,
-  endDate: string | null
-) {
-  const whereClause: any = {};
-  const includeClause: any[] = [
-    {
-      model: Tag,
-      as: "tags",
-      required: tags.length > 0,
-      through: { attributes: [] },
-    },
-  ];
-
-  if (tags.length > 0) {
-    includeClause[0].where = {
-      name: {
-        [Op.in]: tags,
+    tags: string[],
+    startDate: string | null,
+    endDate: string | null
+  ) {
+    const whereClause: any = {};
+    const includeClause: any[] = [
+      {
+        model: Tag,
+        as: "tags",
+        required: tags.length > 0,
+        through: { attributes: [] },
       },
-    };
-  }
+    ];
 
-  if (startDate || endDate) {
-    whereClause.createdAt = {};
-    if (startDate) {
-      whereClause.createdAt[Op.gte] = new Date(startDate);
+    if (tags.length > 0) {
+      includeClause[0].where = {
+        name: {
+          [Op.in]: tags,
+        },
+      };
     }
-    if (endDate) {
-      whereClause.createdAt[Op.lte] = new Date(endDate);
-    }
-  }
 
-  return { whereClause, includeClause };
-}
+    if (startDate || endDate) {
+      whereClause.createdAt = {};
+      if (startDate) {
+        whereClause.createdAt[Op.gte] = new Date(startDate);
+      }
+      if (endDate) {
+        whereClause.createdAt[Op.lte] = new Date(endDate);
+      }
+    }
+
+    return { whereClause, includeClause };
+  }
 
   private static async calculateMemeRatings(memeIds: number[]) {
     if (memeIds.length === 0) return new Map<number, number>();
@@ -187,7 +191,7 @@ export class MemeController {
       return {
         id: meme.id.toString(),
         title: meme.title,
-        imageUrl: meme.image,
+        image: meme.image,
         uploadDate: meme.createdAt,
         rating: votesMap.get(meme.id) || 0,
         tags: tagNames,
@@ -197,7 +201,10 @@ export class MemeController {
     });
   }
 
-  private static sortTransformedMemes(memes: any[], sortBy: string): any[] {
+  private static sortTransformedMemes(
+    memes: MemeDTO[],
+    sortBy: string
+  ): MemeDTO[] {
     switch (sortBy) {
       case "ratingDesc":
         return memes.sort((a, b) => b.rating - a.rating);
@@ -222,17 +229,21 @@ export class MemeController {
   }
 
   /**
-   * Retrieves a random meme from the database
-   * @returns {Promise<Meme | null>} - A random meme or null
+   * Retrieves the meme of the day, transformed for frontend consumption.
+   * @param {number | undefined} currentUserId - The ID of the currently authenticated user.
+   * @returns {Promise<any | null>} - The transformed meme object or null.
    */
-  static async getMemeOfTheDay(): Promise<Meme | null> {
+  static async getMemeOfTheDay(
+    currentUserId?: number
+  ): Promise<MemeDTO | null> {
     try {
       const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 
+      let featuredMemeInstance = null;
       const featured = await FeaturedMeme.findOne({ where: { date: today } });
 
       if (featured) {
-        const meme = await Meme.findByPk(featured.memeId, {
+        featuredMemeInstance = await Meme.findByPk(featured.memeId, {
           include: [
             {
               model: Tag,
@@ -242,32 +253,110 @@ export class MemeController {
             },
           ],
         });
-        if (meme) return meme;
       }
 
-      const randomMeme = await Meme.findOne({
-        order: Sequelize.literal("RANDOM()"),
-        include: [
-          {
-            model: Tag,
-            as: "tags",
-            required: false,
-            through: { attributes: [] },
-          },
-        ],
-      });
-
-      if (randomMeme) {
-        await FeaturedMeme.create({
-          memeId: randomMeme.id,
-          date: today,
+      if (!featuredMemeInstance) {
+        featuredMemeInstance = await Meme.findOne({
+          order: Sequelize.literal("RANDOM()"),
+          include: [
+            {
+              model: Tag,
+              as: "tags",
+              required: false,
+              through: { attributes: [] },
+            },
+          ],
         });
-        return randomMeme;
+
+        if (featuredMemeInstance) {
+          await FeaturedMeme.create({
+            memeId: featuredMemeInstance.id,
+            date: today,
+          });
+        }
+      }
+
+      if (featuredMemeInstance) {
+        const transformedMeme = await this.transformSingleMeme(
+          featuredMemeInstance,
+          currentUserId
+        );
+        return transformedMeme;
       }
 
       return null;
     } catch (error) {
       console.error("Error getting meme of the day:", error);
+      throw error;
+    }
+  }
+
+  // Helper method to transform a single meme instance into the desired format
+  private static async transformSingleMeme(
+    memeInstance: Meme,
+    currentUserId?: number
+  ): Promise<MemeDTO | null> {
+    if (!memeInstance || typeof memeInstance !== "object") {
+      console.warn(
+        "transformSingleMeme: Invalid meme instance provided",
+        memeInstance
+      );
+      return null;
+    }
+
+    try {
+      const votesAggregate = await Vote.findOne({
+        where: { meme_id: memeInstance.id },
+        attributes: [
+          [Sequelize.fn("SUM", Sequelize.col("value")), "totalRating"],
+        ],
+        raw: true,
+      });
+
+      const totalRating = votesAggregate?.value
+        ? parseInt(votesAggregate.value as any, 10)
+        : 0;
+
+      let userVoteValue = 0;
+      if (currentUserId) {
+        const userVote = await Vote.findOne({
+          where: {
+            meme_id: memeInstance.id,
+            user_id: currentUserId,
+          },
+          attributes: ["value"],
+          raw: true,
+        });
+        userVoteValue = userVote ? userVote.value : 0;
+      }
+      const tagNames =
+        memeInstance.tags && Array.isArray(memeInstance.tags)
+          ? memeInstance.tags
+              .map((tag: any) =>
+                tag && typeof tag === "object" ? tag.name : String(tag)
+              )
+              .filter(Boolean)
+          : [];
+
+      return {
+        id: memeInstance.id,
+        title: memeInstance.title || "Untitled",
+        image: memeInstance.image || "",
+        uploadDate: memeInstance.createdAt,
+        rating: totalRating,
+        tags: tagNames,
+        uploader: memeInstance.user_id
+          ? `user${memeInstance.user_id}`
+          : "anonymous",
+        userVote: userVoteValue,
+      };
+    } catch (error) {
+      console.error(
+        "Error transforming single meme:",
+        error,
+        "Meme instance:",
+        memeInstance
+      );
       return null;
     }
   }
@@ -301,7 +390,7 @@ export class MemeController {
       const meme = await Meme.create({
         title: data.title.trim(),
         image: base64Image,
-        user_id: data.user_id, // Ritorna il meme con i tags,
+        user_id: data.user_id,
       });
 
       if (data.tags && data.tags.length > 0) {

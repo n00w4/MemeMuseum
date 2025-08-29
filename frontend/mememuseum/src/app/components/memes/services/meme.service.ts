@@ -98,4 +98,17 @@ export class MemeService {
         })
       );
   }
+
+  getMemeOfTheDay(): Observable<Meme | null> {
+    const url = `${environment.apiMemeUrl}/meme-of-the-day`;
+    return this.http.get<ApiResponse<Meme | null>>(url).pipe(
+      map(response => {
+        return response.data && typeof response.data === 'object' && 'id' in response.data ? response.data : null;
+      }),
+      catchError((error) => {
+        console.error('MemeService: Error fetching meme of the day:', error);
+        return of(null);
+      })
+    );
+  }
 }

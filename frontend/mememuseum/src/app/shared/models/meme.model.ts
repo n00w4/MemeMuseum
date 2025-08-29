@@ -3,7 +3,7 @@ import { Vote } from "./vote.model";
 export interface Meme {
   id: number;
   title: string;
-  imageUrl: string;
+  image: string;
   uploadDate: Date;
   rating: number;
   tags: string[];

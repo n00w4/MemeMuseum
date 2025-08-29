@@ -14,7 +14,6 @@ export const optionalAuthentication: RequestHandler = async (req, res, next) => 
   const token = req.cookies.sessionToken;
 
   if (!token) {
-    console.log('No token found');
     next();
     return;
   }

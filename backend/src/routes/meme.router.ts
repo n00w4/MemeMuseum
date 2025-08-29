@@ -126,7 +126,7 @@ memeRouter.post('/memes', enforceAuthentication,  verifyCsrfToken, async (req: R
 
 /**
  * @swagger
- *  /api/v1/meme-of-the-day:
+ *  /api/v1/memes/meme-of-the-day:
  *    get:
  *      description: Retrieve the meme of the day
  *      produces:
@@ -137,7 +137,7 @@ memeRouter.post('/memes', enforceAuthentication,  verifyCsrfToken, async (req: R
  *        500:
  *          description: Internal server error
  */
-memeRouter.get("/meme-of-the-day", async (req: Request, res: Response, next: NextFunction) => {
+memeRouter.get("/memes/meme-of-the-day", async (req: Request, res: Response, next: NextFunction) => {
     try {
         const meme = await MemeController.getMemeOfTheDay();
         return res.success('Meme of the day retrieved successfully', meme);
