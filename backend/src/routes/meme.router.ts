@@ -18,20 +18,24 @@ export const memeRouter = express.Router();
  *      produces:
  *        - application/json
  *      responses:
- *        200: 
+ *        200:
  *          description: Memes retrieved successfully
  *        500:
  *          description: Internal server error
  */
-memeRouter.get("/memes", optionalAuthentication, async (req: Request, res: Response, next: NextFunction) => {
+memeRouter.get(
+  "/memes",
+  optionalAuthentication,
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const memes = await MemeController.getAllMemes(req);
-        return res.success('Memes retrieved successfully', memes);
+      const memes = await MemeController.getAllMemes(req);
+      return res.success("Memes retrieved successfully", memes);
     } catch (err) {
-        console.error(err);
-        return res.fail(500, 'Could not retrieve memes');
+      console.error(err);
+      return res.fail(500, "Could not retrieve memes");
     }
-});
+  }
+);
 
 /**
  * @swagger
@@ -66,63 +70,84 @@ memeRouter.get("/memes", optionalAuthentication, async (req: Request, res: Respo
  *       500:
  *         description: Internal server error
  */
-memeRouter.post('/memes', enforceAuthentication,  verifyCsrfToken, async (req: Request, res: Response, next: NextFunction) => {
-  upload.single('image')(req, res, async (err) => {
-    try {
-      if (err instanceof MulterError) {
-        switch (err.code) {
-          case 'LIMIT_FILE_SIZE':
-            return res.fail(400, 'File too large. Maximum size is 10MB');
-          case 'LIMIT_FILE_COUNT':
-            return res.fail(400, 'Too many files. Only 1 file is allowed');
-          case 'LIMIT_UNEXPECTED_FILE':
-            return res.fail(400, 'Unexpected file field');
-          case 'LIMIT_FIELD_COUNT':
-            return res.fail(400, 'Too many fields');
-          case 'LIMIT_FIELD_KEY':
-            return res.fail(400, 'Field name too long');
-          case 'LIMIT_FIELD_VALUE':
-            return res.fail(400, 'Field value too long');
-          case 'LIMIT_PART_COUNT':
-            return res.fail(400, 'Too many parts');
-          default:
-            return res.fail(400, `Upload error: ${err.message}`);
+memeRouter.post(
+  "/memes",
+  enforceAuthentication,
+  verifyCsrfToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    upload.single("image")(req, res, async (err) => {
+      try {
+        if (err instanceof MulterError) {
+          switch (err.code) {
+            case "LIMIT_FILE_SIZE":
+              return res.fail(400, "File too large. Maximum size is 10MB");
+            case "LIMIT_FILE_COUNT":
+              return res.fail(400, "Too many files. Only 1 file is allowed");
+            case "LIMIT_UNEXPECTED_FILE":
+              return res.fail(400, "Unexpected file field");
+            case "LIMIT_FIELD_COUNT":
+              return res.fail(400, "Too many fields");
+            case "LIMIT_FIELD_KEY":
+              return res.fail(400, "Field name too long");
+            case "LIMIT_FIELD_VALUE":
+              return res.fail(400, "Field value too long");
+            case "LIMIT_PART_COUNT":
+              return res.fail(400, "Too many parts");
+            default:
+              return res.fail(400, `Upload error: ${err.message}`);
+          }
         }
-      }
 
-      const { title, user_id } = req.body;
-      
-      if (!title) {
-        return res.fail(400, 'Title is required');
-      }
-      
-      if (!user_id) {
-        return res.fail(400, 'User ID is required');
-      }
-      
-      if (!req.file) {
-        return res.fail(400, 'Image is required. Only JPEG, PNG, GIF, and WebP images are accepted');
-      }
-      
-      const parsedUserId = parseInt(user_id, 10);
-      if (isNaN(parsedUserId)) {
-        return res.fail(400, 'User ID must be a number');
-      }
+        const { title, user_id } = req.body;
+        let { tags } = req.body;
 
-      const meme = await MemeController.saveMeme({
-        title,
-        imageBuffer: req.file.buffer,
-        user_id: parsedUserId
-      });
+        if (!title) {
+          return res.fail(400, "Title is required");
+        }
 
-      return res.success('Meme created successfully', meme, 201);
+        if (!user_id) {
+          return res.fail(400, "User ID is required");
+        }
 
-    } catch (error) {
-      console.error('Meme creation error:', error);
-      return res.fail(500, 'Could not create meme');
-    }
-  });
-});
+        if (!req.file) {
+          return res.fail(
+            400,
+            "Image is required. Only JPEG, PNG, GIF, and WebP images are accepted"
+          );
+        }
+
+        const parsedUserId = parseInt(user_id, 10);
+        if (isNaN(parsedUserId)) {
+          return res.fail(400, "User ID must be a number");
+        }
+
+        let parsedTags: string[] = [];
+        if (tags) {
+          if (Array.isArray(tags)) {
+            parsedTags = tags;
+          } else {
+            parsedTags = [tags];
+          }
+          parsedTags = parsedTags
+            .map((tag) => tag.trim())
+            .filter((tag) => tag.length > 0);
+        }
+
+        const meme = await MemeController.saveMeme({
+          title,
+          imageBuffer: req.file.buffer,
+          user_id: parsedUserId,
+          tags: parsedTags,
+        });
+
+        return res.success("Meme created successfully", meme, 201);
+      } catch (error) {
+        console.error("Meme creation error:", error);
+        return res.fail(500, "Could not create meme");
+      }
+    });
+  }
+);
 
 /**
  * @swagger
@@ -137,15 +162,18 @@ memeRouter.post('/memes', enforceAuthentication,  verifyCsrfToken, async (req: R
  *        500:
  *          description: Internal server error
  */
-memeRouter.get("/memes/meme-of-the-day", async (req: Request, res: Response, next: NextFunction) => {
+memeRouter.get(
+  "/memes/meme-of-the-day",
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const meme = await MemeController.getMemeOfTheDay();
-        return res.success('Meme of the day retrieved successfully', meme);
+      const meme = await MemeController.getMemeOfTheDay();
+      return res.success("Meme of the day retrieved successfully", meme);
     } catch (err) {
-        console.error(err);
-        return res.fail(500, 'Could not retrieve meme of the day');
+      console.error(err);
+      return res.fail(500, "Could not retrieve meme of the day");
     }
-});
+  }
+);
 
 /**
  * @swagger
@@ -162,16 +190,19 @@ memeRouter.get("/memes/meme-of-the-day", async (req: Request, res: Response, nex
  *        500:
  *          description: Internal server error
  */
-memeRouter.get("/memes/:id", async (req: Request, res: Response, next: NextFunction) => {
+memeRouter.get(
+  "/memes/:id",
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const meme = await MemeController.getAllMemes(req);
-        meme ?? res.fail(404, 'Meme not found');
-        return res.success('Memes retrieved successfully', meme);
+      const meme = await MemeController.getAllMemes(req);
+      meme ?? res.fail(404, "Meme not found");
+      return res.success("Memes retrieved successfully", meme);
     } catch (err) {
-        console.error(err);
-        return res.fail(500, 'Could not retrieve memes');
+      console.error(err);
+      return res.fail(500, "Could not retrieve memes");
     }
-});
+  }
+);
 
 /**
  * @swagger
@@ -202,18 +233,23 @@ memeRouter.get("/memes/:id", async (req: Request, res: Response, next: NextFunct
  *        500:
  *          description: Internal server error
  */
-memeRouter.post("/memes/:id/vote", enforceAuthentication, verifyCsrfToken, async (req: Request, res: Response, next: NextFunction) => {
+memeRouter.post(
+  "/memes/:id/vote",
+  enforceAuthentication,
+  verifyCsrfToken,
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (req.body.value !== 1 && req.body.value !== -1) {
-        return res.fail(400, 'Value must be 1 or -1');
+        return res.fail(400, "Value must be 1 or -1");
       }
       const vote = await VoteController.saveVote(req);
-      return res.success('Vote assigned successfully', vote);
+      return res.success("Vote assigned successfully", vote);
     } catch (err) {
-        console.error(err);
-        return res.fail(500, 'Could not retrieve memes');
+      console.error(err);
+      return res.fail(500, "Could not retrieve memes");
     }
-});
+  }
+);
 
 /**
  * @swagger
@@ -246,24 +282,29 @@ memeRouter.post("/memes/:id/vote", enforceAuthentication, verifyCsrfToken, async
  *        500:
  *          description: Internal server error
  */
-memeRouter.delete("/memes/:id/vote", enforceAuthentication, verifyCsrfToken, async (req: Request, res: Response, next: NextFunction) => {
+memeRouter.delete(
+  "/memes/:id/vote",
+  enforceAuthentication,
+  verifyCsrfToken,
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { user_id, meme_id } = req.body;
       if (!user_id || !meme_id) {
-        return res.fail(400, 'User ID and Meme ID are required');
+        return res.fail(400, "User ID and Meme ID are required");
       }
-      
+
       const deleted = await VoteController.deleteVote(req);
       if (deleted) {
-        return res.success('Vote removed successfully', deleted);
+        return res.success("Vote removed successfully", deleted);
       } else {
-        return res.fail(404, 'Vote not found');
+        return res.fail(404, "Vote not found");
       }
     } catch (err) {
-        console.error(err);
-        return res.fail(500, 'Could not remove vote');
+      console.error(err);
+      return res.fail(500, "Could not remove vote");
     }
-});
+  }
+);
 
 /**
  * @swagger
@@ -280,21 +321,25 @@ memeRouter.delete("/memes/:id/vote", enforceAuthentication, verifyCsrfToken, asy
  *        500:
  *          description: Internal server error
  */
-memeRouter.get("/memes/:id/comments", enforceAuthentication, async (req: Request, res: Response, next: NextFunction) => {
+memeRouter.get(
+  "/memes/:id/comments",
+  enforceAuthentication,
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const memeId = parseInt(req.params.id, 10);
-        if (isNaN(memeId)) {
-            return res.fail(400, 'Invalid meme ID');
-        }
+      const memeId = parseInt(req.params.id, 10);
+      if (isNaN(memeId)) {
+        return res.fail(400, "Invalid meme ID");
+      }
 
-        const comments = await CommentController.getComments(memeId);
+      const comments = await CommentController.getComments(memeId);
 
-        return res.success('Comments fetched successfully', comments);
+      return res.success("Comments fetched successfully", comments);
     } catch (err) {
-        console.error('Error fetching comments:', err);
-        return res.fail(500, 'Could not fetch comments');
+      console.error("Error fetching comments:", err);
+      return res.fail(500, "Could not fetch comments");
     }
-});
+  }
+);
 
 /**
  * @swagger
@@ -328,12 +373,17 @@ memeRouter.get("/memes/:id/comments", enforceAuthentication, async (req: Request
  *        500:
  *          description: Internal server error
  */
-memeRouter.post("/memes/:id/create-comment", enforceAuthentication, verifyCsrfToken, async (req: Request, res: Response, next: NextFunction) => {
+memeRouter.post(
+  "/memes/:id/create-comment",
+  enforceAuthentication,
+  verifyCsrfToken,
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const comment = await CommentController.saveComment(req);
-        return res.success('Comment created successfully', comment);
+      const comment = await CommentController.saveComment(req);
+      return res.success("Comment created successfully", comment);
     } catch (err) {
-        console.error(err);
-        return res.fail(500, 'Could not create comment');
+      console.error(err);
+      return res.fail(500, "Could not create comment");
     }
-});
+  }
+);

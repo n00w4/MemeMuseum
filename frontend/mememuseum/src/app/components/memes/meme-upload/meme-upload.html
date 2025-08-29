@@ -1,0 +1,120 @@
+<div class="upload-container">
+  <div class="upload-card">
+    <h2>Upload New Meme</h2>
+
+    <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()" class="upload-form">
+      <div class="form-group">
+        <label for="title">Title *</label>
+        <input
+          id="title"
+          type="text"
+          formControlName="title"
+          placeholder="Enter meme title"
+          [maxlength]="100"
+          class="form-control"
+          [class.error]="
+            uploadForm.get('title')?.invalid && uploadForm.get('title')?.touched
+          "
+        />
+
+        <div class="char-counter">
+          {{ uploadForm.get("title")?.value?.length || 0 }}/100
+        </div>
+
+        <div
+          class="error-message"
+          *ngIf="
+            uploadForm.get('title')?.invalid && uploadForm.get('title')?.touched
+          "
+        >
+          <span *ngIf="uploadForm.get('title')?.errors?.['required']"
+            >Title is required</span
+          >
+          <span *ngIf="uploadForm.get('title')?.errors?.['maxlength']"
+            >Title must be less than 100 characters</span
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="tags">Tags (optional)</label>
+        <input
+          id="tags"
+          type="text"
+          formControlName="tags"
+          placeholder="Enter tags separated by commas (e.g., funny, cat, lol)"
+          class="form-control"
+        />
+        <div class="help-text">Separate tags with commas</div>
+      </div>
+
+      <div class="form-group">
+        <label for="imageInput">Image * (Max 5MB)</label>
+        <div class="file-upload-area">
+          <input
+            id="imageInput"
+            type="file"
+            accept="image/jpeg,image/png,image/gif,image/webp"
+            (change)="onFileSelected($event)"
+            class="file-input"
+          />
+
+          <div
+            class="file-upload-label"
+            [class.error]="
+              uploadForm.get('image')?.invalid &&
+              uploadForm.get('image')?.touched
+            "
+          >
+            <span>Choose an image file</span>
+            <span class="browse-btn">Browse</span>
+          </div>
+        </div>
+
+        <div
+          class="error-message"
+          *ngIf="
+            uploadForm.get('image')?.invalid && uploadForm.get('image')?.touched
+          "
+        >
+          Image is required
+        </div>
+      </div>
+
+      <div class="image-preview" *ngIf="imagePreview">
+        <h4>Preview:</h4>
+        <img [src]="imagePreview" alt="Meme preview" class="preview-image" />
+      </div>
+
+      <div class="feedback-messages">
+        <div class="error-message" *ngIf="uploadError()">
+          {{ uploadError() }}
+        </div>
+
+        <div class="success-message" *ngIf="uploadSuccess()">
+          {{ uploadSuccess() }}
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="onCancel()"
+          [disabled]="isUploading()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="uploadForm.invalid || !selectedFile || isUploading()"
+        >
+          <span *ngIf="!isUploading()">Upload Meme</span>
+          <span *ngIf="isUploading()">Uploading...</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

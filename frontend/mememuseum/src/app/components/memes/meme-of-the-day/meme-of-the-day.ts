@@ -1,15 +1,15 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MemeCardComponent } from '../memes/meme-card/meme-card'; // Import MemeCard
-import { MemeService } from '../memes/services/meme.service'; // Import MemeService
-import { Meme } from '../../shared/models/meme.model'; // Import Meme model
-import { ToastService } from '../../core/services/toast.service'; // For error messages
-import { UserService } from '../../core/services/user.service'; // To check login status
+import { MemeCardComponent } from '../meme-card/meme-card';
+import { MemeService } from '../services/meme.service';
+import { Meme } from '../../../shared/models/meme.model';
+import { ToastService } from '../../../core/services/toast.service';
+import { UserService } from '../../../core/services/user.service';
 
 @Component({
   selector: 'app-meme-of-the-day',
   standalone: true,
-  imports: [CommonModule, MemeCardComponent], // Import MemeCard
+  imports: [CommonModule, MemeCardComponent],
   templateUrl: './meme-of-the-day.html',
   styleUrls: ['./meme-of-the-day.scss']
 })

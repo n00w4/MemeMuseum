@@ -362,6 +362,78 @@ export class MemeController {
   }
 
   /**
+   * Determines MIME type from buffer header
+   * @param buffer - Image buffer to analyze
+   * @returns MIME type string
+   */
+  private static getMimeTypeFromBuffer(buffer: Buffer): string {
+    // Usa il costrutto Buffer corretto
+    const header = Buffer.from(buffer.subarray(0, 4));
+
+    // JPEG
+    if (header[0] === 0xff && header[1] === 0xd8) {
+      return "image/jpeg";
+    }
+
+    // PNG
+    if (
+      header[0] === 0x89 &&
+      header[1] === 0x50 &&
+      header[2] === 0x4e &&
+      header[3] === 0x47
+    ) {
+      return "image/png";
+    }
+
+    // GIF
+    if (header[0] === 0x47 && header[1] === 0x49 && header[2] === 0x46) {
+      return "image/gif";
+    }
+
+    // WebP
+    if (
+      header[0] === 0x52 &&
+      header[1] === 0x49 &&
+      header[2] === 0x46 &&
+      header[3] === 0x46
+    ) {
+      return "image/webp";
+    }
+
+    // Default fallback
+    return "image/png";
+  }
+
+  /**
+   * Processes and creates tags for a meme
+   * @param meme - The created meme instance
+   * @param tags - Array of tag names
+   */
+  private static async processMemeTags(
+    meme: Meme,
+    tags: string[]
+  ): Promise<void> {
+    if (!tags || tags.length === 0) return;
+
+    const validTags = tags
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
+
+    if (validTags.length === 0) return;
+
+    const tagPromises = validTags.map(async (tagName) => {
+      const [tag] = await Tag.findOrCreate({
+        where: { name: tagName },
+        defaults: { name: tagName },
+      });
+      return tag;
+    });
+
+    const tagInstances = await Promise.all(tagPromises);
+    await meme.setTags(tagInstances);
+  }
+
+  /**
    * Attempts to save a new Meme
    * @param data - The data to save the Meme
    * @returns {Promise<Meme | null>} - The created Meme or null on failure
@@ -372,20 +444,23 @@ export class MemeController {
     user_id: number;
     tags?: string[];
   }): Promise<Meme | null> {
+    if (!data?.title || !data?.imageBuffer || !data?.user_id) {
+      throw new Error("Missing required meme data");
+    }
+
+    if (data.title.length > 100) {
+      throw new Error("Title exceeds maximum length (100 chars)");
+    }
+
+    if (data.imageBuffer.length > 5 * 1024 * 1024) {
+      throw new Error("Image too large (max 5MB)");
+    }
+
     try {
-      if (!data?.title || !data?.imageBuffer || !data?.user_id) {
-        throw new Error("Missing required meme data");
-      }
-
-      if (data.title.length > 100) {
-        throw new Error("Title exceeds maximum length (100 chars)");
-      }
-
-      if (data.imageBuffer.length > 5 * 1024 * 1024) {
-        throw new Error("Image too large (max 5MB)");
-      }
-
-      const base64Image = data.imageBuffer.toString("base64");
+      const mimeType = this.getMimeTypeFromBuffer(data.imageBuffer);
+      const base64Image = `data:${mimeType};base64,${data.imageBuffer.toString(
+        "base64"
+      )}`;
 
       const meme = await Meme.create({
         title: data.title.trim(),
@@ -393,19 +468,7 @@ export class MemeController {
         user_id: data.user_id,
       });
 
-      if (data.tags && data.tags.length > 0) {
-        const tagPromises = data.tags.map(async (tagName) => {
-          const [tag] = await Tag.findOrCreate({
-            where: { name: tagName.trim() },
-            defaults: { name: tagName.trim() },
-          });
-          return tag;
-        });
-
-        const tagInstances = await Promise.all(tagPromises);
-
-        await meme.setTags(tagInstances);
-      }
+      await this.processMemeTags(meme, data.tags || []);
 
       return await Meme.findByPk(meme.id, {
         include: [

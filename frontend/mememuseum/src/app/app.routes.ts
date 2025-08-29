@@ -1,7 +1,8 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './components/login/login';
 import { HomeComponent } from './components/home/home';
-import { MemeOfTheDayComponent } from './components/meme-of-the-day/meme-of-the-day';
+import { MemeOfTheDayComponent } from './components/memes/meme-of-the-day/meme-of-the-day';
+import { MemeUploadComponent } from './components/memes/meme-upload/meme-upload';
 
 export const routes: Routes = [
   {
@@ -18,6 +19,11 @@ export const routes: Routes = [
     path: 'meme-of-the-day',
     component: MemeOfTheDayComponent,
     title: 'Meme Of The Day | MEMEMUSEUM',
+  },
+  {
+    path: 'upload',
+    component: MemeUploadComponent,
+    title: 'Upload Meme | MEMEMUSEUM',
   },
   {
     path: '',
