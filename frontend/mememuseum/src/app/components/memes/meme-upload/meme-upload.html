@@ -21,19 +21,16 @@
           {{ uploadForm.get("title")?.value?.length || 0 }}/100
         </div>
 
-        <div
-          class="error-message"
-          *ngIf="
-            uploadForm.get('title')?.invalid && uploadForm.get('title')?.touched
-          "
-        >
-          <span *ngIf="uploadForm.get('title')?.errors?.['required']"
-            >Title is required</span
-          >
-          <span *ngIf="uploadForm.get('title')?.errors?.['maxlength']"
-            >Title must be less than 100 characters</span
-          >
+        @if (uploadForm.get('title')?.invalid &&
+        uploadForm.get('title')?.touched) {
+        <div class="error-message">
+          @if (uploadForm.get('title')?.errors?.['required']) {
+          <span>Title is required</span>
+          } @if (uploadForm.get('title')?.errors?.['maxlength']) {
+          <span>Title must be less than 100 characters</span>
+          }
         </div>
+        }
       </div>
 
       <div class="form-group">
@@ -71,29 +68,29 @@
           </div>
         </div>
 
-        <div
-          class="error-message"
-          *ngIf="
-            uploadForm.get('image')?.invalid && uploadForm.get('image')?.touched
-          "
-        >
-          Image is required
-        </div>
+        @if (uploadForm.get('image')?.invalid &&
+        uploadForm.get('image')?.touched) {
+        <div class="error-message">Image is required</div>
+        }
       </div>
 
-      <div class="image-preview" *ngIf="imagePreview">
+      @if (imagePreview) {
+      <div class="image-preview">
         <h4>Preview:</h4>
         <img [src]="imagePreview" alt="Meme preview" class="preview-image" />
       </div>
+      }
 
       <div class="feedback-messages">
-        <div class="error-message" *ngIf="uploadError()">
+        @if (uploadError()) {
+        <div class="error-message">
           {{ uploadError() }}
         </div>
-
-        <div class="success-message" *ngIf="uploadSuccess()">
+        } @if (uploadSuccess()) {
+        <div class="success-message">
           {{ uploadSuccess() }}
         </div>
+        }
       </div>
 
       <div class="form-actions">
@@ -111,8 +108,11 @@
           class="btn btn-primary"
           [disabled]="uploadForm.invalid || !selectedFile || isUploading()"
         >
-          <span *ngIf="!isUploading()">Upload Meme</span>
-          <span *ngIf="isUploading()">Uploading...</span>
+          @if (!isUploading()) {
+          <span>Upload Meme</span>
+          } @if (isUploading()) {
+          <span>Uploading...</span>
+          }
         </button>
       </div>
     </form>

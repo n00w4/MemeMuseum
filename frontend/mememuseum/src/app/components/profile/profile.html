@@ -1,0 +1,14 @@
+<div class="profile-container">
+  <h2>Profile</h2>
+
+  <div class="theme-selector">
+    <label for="theme-select">Scegli il tema:</label>
+    <select id="theme-select" (change)="changeTheme($any($event.target).value)">
+      @for (theme of themes; track theme) {
+        <option [value]="theme" [selected]="theme === selectedTheme">
+          {{ theme | titlecase }}
+        </option>
+      }
+    </select>
+  </div>
+</div>

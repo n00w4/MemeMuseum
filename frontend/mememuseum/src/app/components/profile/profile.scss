@@ -1,0 +1,23 @@
+.profile-container {
+  padding: 2rem;
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+}
+
+.theme-selector {
+  margin-top: 1rem;
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  select {
+    padding: 0.5rem;
+    font-size: 1rem;
+    background-color: var(--color-input-bg);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+  }
+}

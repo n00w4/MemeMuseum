@@ -3,6 +3,7 @@ import { LoginComponent } from './components/login/login';
 import { HomeComponent } from './components/home/home';
 import { MemeOfTheDayComponent } from './components/memes/meme-of-the-day/meme-of-the-day';
 import { MemeUploadComponent } from './components/memes/meme-upload/meme-upload';
+import { ProfileComponent } from './components/profile/profile';
 
 export const routes: Routes = [
   {
@@ -24,6 +25,11 @@ export const routes: Routes = [
     path: 'upload',
     component: MemeUploadComponent,
     title: 'Upload Meme | MEMEMUSEUM',
+  },
+  {
+    path: 'profile',
+    component: ProfileComponent,
+    title: 'Profile | MEMEMUSEUM',
   },
   {
     path: '',
