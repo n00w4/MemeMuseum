@@ -30,7 +30,6 @@ export const optionalAuthentication: RequestHandler = async (req, res, next) => 
         console.log('Token valid for username:', username);
         
         const user = await UserController.getUserByUsername(username);
-        console.log('User loaded:', user ? { id: user.id, username: user.username } : null);
         
         if (user) {
           (req as any).user = user;

@@ -86,7 +86,7 @@ authRouter.get('/is-authenticated', enforceAuthentication, (req: Request, res: R
  *        description: User logged out
  */
 authRouter.post("/logout", (req: Request, res: Response, next: NextFunction) => {
-  res.clearCookie("authToken");
+  res.clearCookie("sessionToken");
   res.status(200).json({ message: "Logout successful" });
 });
 
@@ -114,7 +114,7 @@ authRouter.get("/csrf-token", (req: Request, res: Response, next: NextFunction) 
 
 /**
  * @swagger
- *  /api/v1/auth/signup:
+ *  /api/v1/auth/register:
  *    post:
  *      description: User registration
  *      produces:
@@ -143,7 +143,7 @@ authRouter.get("/csrf-token", (req: Request, res: Response, next: NextFunction) 
  *          description: Could not save user
  */
 authRouter.post(
-  "/signup",
+  "/register",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = await AuthController.saveUser(req);

@@ -21,22 +21,31 @@ export class LoginComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  loginForm: FormGroup;
+  loginForm!: FormGroup;
   loading = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
   private loginSubscription: Subscription | null = null;
 
-  constructor() {
+  ngOnInit(): void {
+    this.initializeForm();
+    this.resetFormIfNeeded();
+  }
+
+  private initializeForm(): void {
     this.loginForm = this.fb.group({
       username: ['', Validators.required],
       password: ['', Validators.required],
     });
+    this.resetMessages();
   }
 
-  ngOnInit(): void {
+  private resetMessages(): void {
     this.errorMessage = null;
     this.successMessage = null;
+  }
+
+  private resetFormIfNeeded(): void {
     if (
       this.loginForm.get('username')?.value ||
       this.loginForm.get('password')?.value
@@ -106,37 +115,19 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   private redirectAfterLogin(): void {
-    setTimeout(() => {
-      const returnUrl = this.getReturnUrl();
-      this.router
-        .navigateByUrl(returnUrl)
-        .then(() => {
-          this.authService.refreshAuthStatus().subscribe();
-        })
-        .catch((error) => {
-          console.error('Navigation error:', error);
-          this.router.navigate(['/home']);
-        });
-    }, 1000);
-  }
-
-  logout() {
-    if (this.loginSubscription) {
-      this.loginSubscription.unsubscribe();
-      this.loginSubscription = null;
-    }
-    this.authService.logout().subscribe({
-      next: () => {
-        this.loginForm.reset();
-        this.successMessage = null;
-        this.errorMessage = 'You have been logged out successfully.';
-        this.router.navigate(['/login']);
-      },
-      error: (err) => {
-        this.errorMessage = err.message || 'Error during logout.';
-      },
-    });
-  }
+  setTimeout(() => {
+    const returnUrl = this.getReturnUrl();
+    this.router
+      .navigateByUrl(returnUrl)
+      .then(() => {
+        this.authService.refreshAuthStatus().subscribe();
+      })
+      .catch((error) => {
+        console.error('Navigation error:', error);
+        this.router.navigate(['/home']);
+      });
+  }, 1000);
+}
 
   ngOnDestroy(): void {
     if (this.loginSubscription) {

@@ -30,8 +30,7 @@ export class MemeService {
 
     const commentRequests$ = memeIds.map((id) =>
       this.commentService.getComments(id).pipe(
-        catchError((error) => {
-          console.error(`Error fetching comments for meme ${id}:`, error);
+        catchError(() => {
           return of([]);
         })
       )

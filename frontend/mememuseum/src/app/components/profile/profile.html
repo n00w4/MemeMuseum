@@ -1,14 +1,62 @@
 <div class="profile-container">
   <h2>Profile</h2>
 
-  <div class="theme-selector">
-    <label for="theme-select">Scegli il tema:</label>
-    <select id="theme-select" (change)="changeTheme($any($event.target).value)">
-      @for (theme of themes; track theme) {
-        <option [value]="theme" [selected]="theme === selectedTheme">
-          {{ theme | titlecase }}
-        </option>
-      }
-    </select>
+  <!-- User Info Section -->
+  <div class="user-info-section">
+    <h3>User Information</h3>
+    
+    @if (isLoading) {
+      <div class="loading">Loading user information...</div>
+    } @else if (currentUser) {
+      <div class="user-details">
+        <div class="user-field">
+          <span class="label">Username:</span>
+          <span class="value">{{ currentUser.username }}</span>
+        </div>
+        @if (currentUser.email) {
+          <div class="user-field">
+            <span class="label">Email:</span>
+            <span class="value">{{ currentUser.email }}</span>
+          </div>
+        }
+        <div class="user-field">
+          <span class="label">User ID:</span>
+          <span class="value">{{ currentUser.id }}</span>
+        </div>
+        
+        <div class="logout-section">
+          <button 
+            class="logout-button" 
+            (click)="logout()" 
+            [disabled]="isLoggingOut">
+            @if (isLoggingOut) {
+              <span>Logging out...</span>
+            } @else {
+              <span>Logout</span>
+            }
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="guest-message">
+        <p>You are currently not logged in.</p>
+        <p>You can still change the theme below.</p>
+      </div>
+    }
+  </div>
+
+  <!-- Theme Selector Section -->
+  <div class="theme-selector-section">
+    <h3>Theme Settings</h3>
+    <div class="theme-selector">
+      <label for="theme-select">Choose theme:</label>
+      <select id="theme-select" (change)="changeTheme($any($event.target).value)">
+        @for (theme of themes; track theme) {
+          <option [value]="theme" [selected]="theme === selectedTheme">
+            {{ theme | titlecase }}
+          </option>
+        }
+      </select>
+    </div>
   </div>
 </div>

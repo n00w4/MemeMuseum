@@ -4,6 +4,7 @@ import { HomeComponent } from './components/home/home';
 import { MemeOfTheDayComponent } from './components/memes/meme-of-the-day/meme-of-the-day';
 import { MemeUploadComponent } from './components/memes/meme-upload/meme-upload';
 import { ProfileComponent } from './components/profile/profile';
+import { RegisterComponent } from './components/register/register';
 
 export const routes: Routes = [
   {
@@ -30,6 +31,11 @@ export const routes: Routes = [
     path: 'profile',
     component: ProfileComponent,
     title: 'Profile | MEMEMUSEUM',
+  },
+  {
+    path: 'register',
+    component: RegisterComponent,
+    title: 'Register | MEMEMUSEUM',
   },
   {
     path: '',

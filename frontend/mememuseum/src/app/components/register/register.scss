@@ -1,0 +1,158 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-main);
+}
+
+.login-card {
+  background: var(--color-card);
+  padding: 2.5rem 2rem;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8),
+              inset 0 0 20px rgba(var(--color-accent2-rgb), 0.08);
+  width: 100%;
+  max-width: 400px;
+  animation: glowPulse 4s ease-in-out infinite;
+
+  h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-weight: 600;
+    font-size: 1.6rem;
+    background: linear-gradient(
+      90deg,
+      var(--color-accent1),
+      var(--color-accent2),
+      var(--color-accent3)
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  h3 {
+    text-align: center;
+    color: var(--color-text-secondary);
+  }
+
+  form > div {
+    position: relative;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: center;
+
+    label {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      width: 80%;
+    }
+
+    input {
+      margin-top: 0.4rem;
+      width: 90%;
+      padding: 0.65rem 0.75rem;
+      background: var(--color-input-bg);
+      border: 2px solid var(--color-border);
+      border-radius: 12px;
+      color: var(--color-text-primary);
+      font-size: 1rem;
+      transition: border 0.3s, box-shadow 0.3s;
+
+      &:focus {
+        outline: none;
+        border: 2px solid transparent;
+        background-origin: border-box;
+        background-clip: padding-box, border-box;
+        background-image: 
+          linear-gradient(var(--color-input-bg), var(--color-input-bg)),
+          linear-gradient(270deg, var(--color-accent1), var(--color-accent2), var(--color-accent3));
+        background-size: 100% 100%, 400%;
+        box-shadow: 0 0 15px rgba(var(--color-accent2-rgb), 0.4);
+      }
+    }
+  }
+
+  button {
+    display: block;
+    margin: 1rem auto 0;
+    width: 90%;
+    padding: 0.8rem;
+    background: linear-gradient(
+      90deg,
+      var(--color-accent1),
+      var(--color-accent2),
+      var(--color-accent3)
+    );
+    background-size: 400%;
+    color: var(--color-bg);
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-position 0.5s, transform 0.2s;
+
+    &:hover:not(:disabled) {
+      background-position: right center;
+      transform: scale(1.02);
+    }
+
+    &:disabled {
+      background: #333;
+      color: #777;
+      cursor: not-allowed;
+    }
+  }
+
+  .error,
+  .success {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .error {
+    color: var(--color-error);
+  }
+  
+  .success {
+    color: var(--color-success);
+  }
+
+  .login-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+
+    .link {
+      color: var(--color-accent2);
+      cursor: pointer;
+      text-decoration: underline;
+      
+      &:hover {
+        color: var(--color-accent1);
+      }
+    }
+  }
+}
+
+/* glow card */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8),
+                inset 0 0 20px rgba(var(--color-accent2-rgb), 0.08);
+  }
+  50% {
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.9),
+                inset 0 0 28px rgba(var(--color-accent2-rgb), 0.14);
+  }
+}

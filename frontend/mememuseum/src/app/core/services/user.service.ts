@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { User } from '../../shared/models/user.model';
 import { ApiResponse } from '../../shared/interfaces/api-response.interface';
@@ -10,10 +10,10 @@ import { ApiResponse } from '../../shared/interfaces/api-response.interface';
   providedIn: 'root',
 })
 export class UserService {
+  private readonly http: HttpClient = inject(HttpClient);
+
   private readonly currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
-
-  constructor(private readonly http: HttpClient) {}
 
   public getCurrentUser(): User | null {
     return this.currentUserSubject.value;
@@ -25,20 +25,29 @@ export class UserService {
   }
 
   public loadCurrentUser(): Observable<User | null> {
-    return this.http
-      .get<ApiResponse<User>>(`${environment.apiUserUrl}/me`, { withCredentials: true })
-      .pipe(
-        map(response => response.data),
-        tap((user) => {
-          this.currentUserSubject.next(user);
-        }),
-        catchError((error) => {
-          console.error('Error loading user: ', error);
-          this.currentUserSubject.next(null);
-          return of(null);
-        })
-      );
-  }
+  return this.http.get(`${environment.apiAuthUrl}/is-authenticated`, { withCredentials: true })
+    .pipe(
+      switchMap(() => {
+        return this.http
+          .get<ApiResponse<User>>(`${environment.apiUserUrl}/me`, { withCredentials: true })
+          .pipe(
+            map(response => response.data),
+            tap((user) => {
+              this.currentUserSubject.next(user);
+            }),
+            catchError((error) => {
+              console.error('Error loading user: ', error);
+              this.currentUserSubject.next(null);
+              return of(null);
+            })
+          );
+      }),
+      catchError((error) => {
+        this.currentUserSubject.next(null);
+        return of(null);
+      })
+    );
+}
 
   public clearCurrentUser(): void {
     this.currentUserSubject.next(null);

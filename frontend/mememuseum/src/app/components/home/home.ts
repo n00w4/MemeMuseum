@@ -41,10 +41,16 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   showAdvancedFilters = signal(false);
 
-  searchForm: FormGroup;
-  advancedFiltersForm: FormGroup;
+  searchForm!: FormGroup;
+  advancedFiltersForm!: FormGroup;
 
-  constructor() {
+  ngOnInit() {
+    this.initializeForms();
+    this.initializeAuth();
+    this.setupSubscriptions();
+  }
+
+  private initializeForms(): void {
     this.searchForm = this.fb.group({
       tags: [''],
     });
@@ -58,17 +64,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    if (this.authSubscription) {
-      this.authSubscription.unsubscribe();
-    }
-
-    if (this.userSubscription) {
-      this.userSubscription.unsubscribe();
-    }
-  }
-
-  ngOnInit() {
+  private initializeAuth(): void {
     this.authService.getCsrfToken().subscribe({
       next: () => {
         this.userService.loadCurrentUser().subscribe({
@@ -102,28 +98,43 @@ export class HomeComponent implements OnInit, OnDestroy {
         });
       },
     });
+  }
 
+  private setupSubscriptions(): void {
     this.authSubscription = this.authService.authState$.subscribe({
       next: (authenticated: boolean | null) => {
         if (authenticated !== null) {
           this.isLoggedIn.set(authenticated);
           if (authenticated) {
             this.userService.loadCurrentUser().subscribe();
+          } else {
+            this.currentUser = null;
           }
         }
       },
       error: (error) => {
         console.error(
-          "Error in authState subscription in HomeComponent:",
+          'Error in authState subscription in HomeComponent:',
           error
         );
         this.isLoggedIn.set(false);
+        this.currentUser = null;
       },
     });
 
     this.userSubscription = this.userService.currentUser$.subscribe((user) => {
       this.currentUser = user;
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
+    }
+
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
   }
 
   loadMemes() {
@@ -159,10 +170,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           this.isLoading.set(false);
         },
         error: (error: any) => {
-          console.error(
-            'Error loading memes in HomeComponent:',
-            error
-          );
+          console.error('Error loading memes in HomeComponent:', error);
 
           if (error instanceof Error) {
             console.error('Error message ', error.message);

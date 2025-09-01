@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable, OnInit } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, of, BehaviorSubject } from 'rxjs';
 import { catchError, map, tap, switchMap } from 'rxjs/operators';
@@ -10,17 +10,23 @@ interface LoginRequest {
   password: string;
 }
 
+interface RegisterRequest {
+  username: string;
+  email: string;
+  password: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
-export class AuthService {
+export class AuthService implements OnInit {
+  private readonly http: HttpClient = inject(HttpClient);
+  private readonly userService: UserService = inject(UserService);
+
   private readonly authStateSubject = new BehaviorSubject<boolean | null>(null);
   public authState$ = this.authStateSubject.asObservable();
 
-  constructor(
-    private readonly http: HttpClient,
-    private readonly userService: UserService
-  ) {
+  ngOnInit(): void {
     this.checkAuthStatusOnInit();
   }
 
@@ -29,13 +35,18 @@ export class AuthService {
   }
 
   public isAuthenticated(force: boolean = false): Observable<boolean> {
+    const hasSessionToken = document.cookie.includes('sessionToken');
+    if (!hasSessionToken && !force) {
+      this.authStateSubject.next(false);
+      return of(false);
+    }
+
     return this.http
       .get(`${environment.apiAuthUrl}/is-authenticated`, {
         withCredentials: true,
       })
       .pipe(
         map(() => {
-          console.log('AuthService: isAuthenticated -> true');
           this.authStateSubject.next(true);
           return true;
         }),
@@ -76,26 +87,9 @@ export class AuthService {
         switchMap(() => this.userService.loadCurrentUser()),
         map(() => {}),
         tap(() => {
-          console.log('AuthService: Login successful');
+          this.authStateSubject.next(true);
         }),
         catchError((error) => throwError(() => this.handleLoginError(error)))
-      );
-  }
-
-  public logout(): Observable<any> {
-    return this.http
-      .post(`${environment.apiAuthUrl}/logout`, {}, { withCredentials: true })
-      .pipe(
-        tap(() => {
-          this.authStateSubject.next(false);
-          this.userService.clearCurrentUser();
-        }),
-        catchError((error) => {
-          console.error('Error during logout: ', error);
-          this.authStateSubject.next(false);
-          this.userService.clearCurrentUser();
-          return throwError(() => error);
-        })
       );
   }
 
@@ -112,10 +106,7 @@ export class AuthService {
           }
         },
         error: (error) => {
-          console.error(
-            "Initial authentication check error: ",
-            error
-          );
+          console.error('Initial authentication check error: ', error);
           this.authStateSubject.next(false);
         },
       });
@@ -136,6 +127,55 @@ export class AuthService {
         return 'Internal Server Error';
       default:
         return `Error ${error.status}: ${error.message}`;
+    }
+  }
+
+  public logout(): Observable<void> {
+    return this.http
+      .post(`${environment.apiAuthUrl}/logout`, {}, { withCredentials: true })
+      .pipe(
+        tap(() => {
+          console.log('AuthService: Logout successful');
+          this.authStateSubject.next(false);
+          this.userService.clearCurrentUser();
+        }),
+        map(() => {}),
+        catchError((error) => {
+          console.error('AuthService: Logout error:', error);
+          this.authStateSubject.next(false);
+          this.userService.clearCurrentUser();
+          return of();
+        })
+      );
+  }
+
+  public register(credentials: RegisterRequest): Observable<void> {
+    return this.http
+      .post(`${environment.apiAuthUrl}/register`, credentials, {
+        withCredentials: true,
+      })
+      .pipe(
+        map(() => {
+          console.log('Registration successful');
+        }),
+        catchError((error) =>
+          throwError(() => this.handleRegistrationError(error))
+        )
+      );
+  }
+
+  private handleRegistrationError(error: HttpErrorResponse): string {
+    switch (error.status) {
+      case 400:
+        return 'Invalid registration data';
+      case 409:
+        return 'Username or email already exists';
+      case 500:
+        return 'Internal server error during registration';
+      case 0:
+        return 'Connection error';
+      default:
+        return `Registration error: ${error.message}`;
     }
   }
 }
