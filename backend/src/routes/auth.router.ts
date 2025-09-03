@@ -147,6 +147,9 @@ authRouter.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = await AuthController.saveUser(req);
+      if (user === null) {
+        return res.fail(409, "Username or email already in use");
+      }
       return res.success("User created", user, 201);
     } catch (err) {
       console.error(err);

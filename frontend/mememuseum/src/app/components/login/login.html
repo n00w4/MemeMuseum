@@ -6,7 +6,7 @@
       <div>
         <label
           >Username
-          <input type="text" formControlName="username" />
+          <input type="text" formControlName="username" data-testid="username-input" />
           @if (loginForm.get('username')?.invalid &&
           loginForm.get('username')?.touched) {
           <div class="error">Username required</div>
@@ -17,7 +17,7 @@
       <div>
         <label
           >Password
-          <input type="password" formControlName="password" />
+          <input type="password" formControlName="password" data-testid="password-input" />
           @if (loginForm.get('password')?.invalid &&
           loginForm.get('password')?.touched) {
           <div class="error">Password required</div>
@@ -25,7 +25,7 @@
         </label>
       </div>
 
-      <button type="submit" [disabled]="loading || loginForm.invalid">
+      <button type="submit" data-testid="login-button" [disabled]="loading || loginForm.invalid">
         {{ loading ? "Loading..." : "Login" }}
       </button>
 

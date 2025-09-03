@@ -1,6 +1,13 @@
 # Node.js dependencies (per frontend e backend)
 **/node_modules/
 
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
 # Compiled output
 **/dist/
 **/build/

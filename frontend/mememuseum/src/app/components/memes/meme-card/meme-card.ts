@@ -13,17 +13,16 @@ import { ToastService } from '../../../core/services/toast.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './meme-card.html',
-  styleUrls: ['./meme-card.scss']
+  styleUrls: ['./meme-card.scss'],
 })
 export class MemeCardComponent {
   private readonly voteService = inject(VoteService);
   private readonly userService = inject(UserService);
   private readonly commentService = inject(CommentService);
-  private readonly toastService = inject(ToastService); 
-  
+  private readonly toastService = inject(ToastService);
+
   @Input() meme!: Meme;
   @Input() isLoggedIn: boolean = false;
-  
 
   userVote = signal<number>(0); // 0 = no vote, 1 = upvote, -1 = downvote
   isLoading = signal(false);
@@ -36,22 +35,22 @@ export class MemeCardComponent {
   commentLoadError = signal<string | null>(null);
   commentSubmitError = signal<string | null>(null);
 
-
   public ngOnInit() {
     if (this.meme.userVote !== undefined) {
       this.userVote.set(this.meme.userVote);
-    } 
+    }
     // Fallback
     else if (this.meme.Votes && this.meme.Votes.length > 0) {
       const currentUserId = this.userService.getCurrentUserId();
       if (currentUserId) {
-        const userVote = this.meme.Votes.find(vote => vote.user_id === currentUserId);
+        const userVote = this.meme.Votes.find(
+          (vote) => vote.user_id === currentUserId
+        );
         if (userVote) {
           this.userVote.set(userVote.value);
         }
       }
-    }
-    else {
+    } else {
       this.userVote.set(0);
     }
   }
@@ -73,7 +72,7 @@ export class MemeCardComponent {
     }
 
     const previousVote = this.userVote();
-    
+
     if (previousVote === value) {
       this.removeVote(value, userId);
     } else {
@@ -81,19 +80,26 @@ export class MemeCardComponent {
     }
   }
 
+  private updateRating(previousVote: number, newVote: number) {
+    // Rimuovi il contributo del voto precedente
+    if (previousVote === 1) this.meme.rating -= 1;
+    if (previousVote === -1) this.meme.rating += 1;
+
+    // Aggiungi il contributo del nuovo voto
+    if (newVote === 1) this.meme.rating += 1;
+    if (newVote === -1) this.meme.rating -= 1;
+  }
+
   private submitVote(value: number, userId: number) {
     this.isLoading.set(true);
-    
+
     this.voteService.voteMeme(this.meme.id, value, userId).subscribe({
       next: (res) => {
-        this.userVote.set(value);
         const previousVote = this.userVote();
+        this.userVote.set(value);
 
-        if (previousVote === 1) this.meme.rating -= 1;
-        if (previousVote === -1) this.meme.rating += 1;
-        if (value === 1) this.meme.rating += 1;
-        if (value === -1) this.meme.rating -= 1;
-        
+        this.updateRating(previousVote, value);
+
         this.isLoading.set(false);
         this.toastService.showSuccess('Vote recorded successfully.');
       },
@@ -101,20 +107,20 @@ export class MemeCardComponent {
         console.error('Vote error:', err);
         this.isLoading.set(false);
         this.toastService.showError('Failed to record vote. Please try again.');
-      }
+      },
     });
   }
 
   private removeVote(previousValue: number, userId: number) {
     this.isLoading.set(true);
-    
+
     this.voteService.removeVote(this.meme.id, userId).subscribe({
       next: (res) => {
+        const previousVote = this.userVote();
         this.userVote.set(0);
-        
-        if (previousValue === 1) this.meme.rating -= 1;
-        if (previousValue === -1) this.meme.rating += 1;
-        
+
+        this.updateRating(previousVote, 0);
+
         this.isLoading.set(false);
         this.toastService.showSuccess('Vote removed successfully.');
       },
@@ -122,7 +128,7 @@ export class MemeCardComponent {
         console.error('Remove vote error:', err);
         this.isLoading.set(false);
         this.toastService.showError('Failed to remove vote. Please try again.');
-      }
+      },
     });
   }
 
@@ -155,15 +161,14 @@ export class MemeCardComponent {
         console.error('Error loading comments for meme', this.meme.id, err);
         let errorMessage = 'Could not load comments.';
         if (err.status === 404) {
-            errorMessage = 'Comments not found.';
+          errorMessage = 'Comments not found.';
         } else if (err.status >= 500) {
-            errorMessage = 'Server error loading comments.';
+          errorMessage = 'Server error loading comments.';
         }
         this.commentLoadError.set(errorMessage);
-      }
+      },
     });
   }
-
 
   submitComment() {
     const content = this.newComment().trim();
@@ -174,48 +179,56 @@ export class MemeCardComponent {
     const userId = this.userService.getCurrentUserId();
     if (!userId) {
       console.error('User ID not found for comment submission.');
-      this.commentSubmitError.set('Authentication error. Please refresh the page.');
+      this.commentSubmitError.set(
+        'Authentication error. Please refresh the page.'
+      );
       return;
     }
 
     this.isCommenting.set(true);
     this.commentSubmitError.set(null);
 
-    this.commentService.createComment({ user_id: userId, meme_id: this.meme.id, content }).subscribe({
-      next: (response) => {
-        console.log('Comment created successfully:', response);
-        if (response.data) {
-            this.comments.update(comments => [...comments, response.data]);
-        } else {
-             // Handle case where backend doesn't return the comment object
-             console.warn('Backend did not return the created comment object. Reloading comments...');
-             // Fallback: reload comments
-             this.commentsLoaded.set(false);
-             this.loadComments();
-        }
-        this.newComment.set('');
-        this.isCommenting.set(false);
-        this.commentSubmitError.set(null);
-        this.toastService.showSuccess('Comment posted successfully.');
-      },
-      error: (err) => {
-        console.error('Error submitting comment:', err);
-        let errorMessage = 'Failed to post comment.';
-        if (err.status === 400) {
+    this.commentService
+      .createComment({ user_id: userId, meme_id: this.meme.id, content })
+      .subscribe({
+        next: (response) => {
+          console.log('Comment created successfully:', response);
+          if (response.data) {
+            this.comments.update((comments) => [...comments, response.data]);
+          } else {
+            // Handle case where backend doesn't return the comment object
+            console.warn(
+              'Backend did not return the created comment object. Reloading comments...'
+            );
+            // Fallback: reload comments
+            this.commentsLoaded.set(false);
+            this.loadComments();
+          }
+          this.newComment.set('');
+          this.isCommenting.set(false);
+          this.commentSubmitError.set(null);
+          this.toastService.showSuccess('Comment posted successfully.');
+        },
+        error: (err) => {
+          console.error('Error submitting comment:', err);
+          let errorMessage = 'Failed to post comment.';
+          if (err.status === 400) {
             if (err.error?.message) {
-                errorMessage = `Invalid comment: ${err.error.message}`;
+              errorMessage = `Invalid comment: ${err.error.message}`;
             } else {
-                 errorMessage = 'Invalid comment data.';
+              errorMessage = 'Invalid comment data.';
             }
-        } else if (err.status === 401 || err.status === 403) {
+          } else if (err.status === 401 || err.status === 403) {
             errorMessage = 'You must be logged in to comment.';
-        } else if (err.status >= 500) {
+          } else if (err.status >= 500) {
             errorMessage = 'Server error. Could not post comment.';
-        }
-        this.commentSubmitError.set(errorMessage);
-        this.isCommenting.set(false);
-        this.toastService.showError("Failed to post comment. Please try again.");
-      }
-    });
+          }
+          this.commentSubmitError.set(errorMessage);
+          this.isCommenting.set(false);
+          this.toastService.showError(
+            'Failed to post comment. Please try again.'
+          );
+        },
+      });
   }
 }

@@ -31,36 +31,31 @@
 
 .meme-card-wrapper {
   width: 100%;
-  max-width: 95%; /* Oppure 1000px, ecc. */
+  max-width: 95%;
 
-  /* Sovrascrivi lo stile dell'immagine del MemeCard solo in questa pagina */
   ::ng-deep .meme-card .meme-image {
-    /* Rimuovi l'altezza fissa */
     height: auto;
-    /* Imposta un limite massimo all'altezza */
-    max-height: 75vh; /* 75% dell'altezza della finestra visibile */
 
-    /* Centra l'immagine nel contenitore */
+    max-height: 75vh;
+
     display: flex;
     justify-content: center;
     align-items: center;
 
     img {
-      /* Mostra l'intera immagine senza tagliarla */
       object-fit: contain;
-      /* Permetti all'immagine di scalare liberamente */
+
       width: auto;
       height: auto;
-      /* Rispetta i limiti del contenitore genitore */
+
       max-width: 100%;
       max-height: 100%;
       display: block;
     }
   }
 
-  /* Opzionale: Aumenta leggermente la dimensione del titolo */
   ::ng-deep .meme-card .meme-info .meme-title {
-     font-size: 1.5rem;
+    font-size: 1.5rem;
   }
 }
 
