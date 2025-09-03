@@ -49,3 +49,9 @@ Il progetto è stato sviluppato come esercitazione universitaria con stack **Ang
 Progetto sviluppato per il corso universitario di Web Technologies.
 - [Luigi Cesaro](https://github.com/n00w4/)
 
+---
+
+
+## Licenza
+
+Questo progetto è rilasciato sotto la licenza MIT. Vedi il file [LICENSE](LICENSE) per maggiori dettagli.
