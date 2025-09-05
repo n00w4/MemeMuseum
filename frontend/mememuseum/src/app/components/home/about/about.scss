@@ -1,0 +1,85 @@
+.about-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    h1 {
+      font-size: 2.5rem;
+      color: var(--color-accent1);
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--color-text-secondary);
+    }
+  }
+
+  .section {
+    margin-bottom: 2rem;
+
+    h2 {
+      color: var(--color-accent2);
+      margin-bottom: 0.75rem;
+    }
+
+    p {
+      line-height: 1.6;
+      color: var(--color-text-primary);
+    }
+
+    ul {
+      padding-left: 1.5rem;
+      margin-top: 1rem;
+
+      li {
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
+        color: var(--color-text-primary);
+
+        strong {
+          color: var(--color-text-primary);
+        }
+      }
+    }
+  }
+
+  .cta {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: inline-block;
+
+      &.primary {
+        background-color: var(--color-accent2);
+        color: white;
+
+        &:hover {
+          background-color: var(--color-accent3);
+        }
+      }
+
+      &.secondary {
+        background-color: transparent;
+        border: 1px solid var(--color-border);
+        color: var(--color-text-primary);
+
+        &:hover {
+          border-color: var(--color-accent2);
+          color: var(--color-accent2);
+        }
+      }
+    }
+  }
+}

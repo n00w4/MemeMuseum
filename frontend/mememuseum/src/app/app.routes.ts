@@ -5,6 +5,8 @@ import { MemeOfTheDayComponent } from './components/memes/meme-of-the-day/meme-o
 import { MemeUploadComponent } from './components/memes/meme-upload/meme-upload';
 import { ProfileComponent } from './components/profile/profile';
 import { RegisterComponent } from './components/register/register';
+import { AboutComponent } from './components/home/about/about';
+import { GuidelinesComponent } from './components/home/guidelines/guidelines';
 
 export const routes: Routes = [
   {
@@ -36,6 +38,16 @@ export const routes: Routes = [
     path: 'register',
     component: RegisterComponent,
     title: 'Register | MEMEMUSEUM',
+  },
+  {
+    path: 'about',
+    component: AboutComponent,
+    title: 'About | MEMEMUSEUM',
+  },
+  {
+    path: 'guidelines',
+    component: GuidelinesComponent,
+    title: 'Guidelines | MEMEMUSEUM',
   },
   {
     path: '',
